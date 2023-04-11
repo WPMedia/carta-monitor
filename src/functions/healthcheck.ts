@@ -1,7 +1,6 @@
-
 module.exports.healthcheck = async () => {
     return {
-        body: 'OK',
-        statusCode: 200,
+        body: "OK",
+        statusCode: 200
     };
-}
+};
