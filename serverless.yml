@@ -1,19 +1,26 @@
 service: carta-monitor
+useDotenv: true
 
 plugins:
     - serverless-plugin-typescript
-    - serverless-offline
 
 provider:
     name: aws
-    runtime: nodejs18.x
+    runtime: nodejs16.x
     region: us-east-1
 
 functions:
-    healthcheck:
-        handler: src/functions/healthcheck.healthcheck
-        description: Healthcheck to ensure the service is up
+    sendScheduling:
+        handler: src/functions/sendScheduling.sendScheduling
+        description: Healthcheck to ensure we can schedule sends
+        environment:
+            STAGE: ${opt:stage, "local"}
         events:
-            - http:
-                  path: healthcheck
-                  method: get
+            - schedule: rate(10 minutes)
+    ses:
+        handler: src/functions/ses.ses
+        description: Healthcheck to ensure our SES Client works
+        environment:
+            STAGE: ${opt:stage, "local"}
+        events:
+            - schedule: rate(10 minutes)

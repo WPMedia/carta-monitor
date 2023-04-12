@@ -2,7 +2,6 @@
     "name": "carta-monitor",
     "version": "0.0.1",
     "description": "A template for a Serverless API using Typescript and Jest",
-    "main": "functions/healthcheck.js",
     "scripts": {
         "lint": "eslint . && prettier --check .",
         "lint:fix": "eslint --fix . && prettier --write .",
@@ -14,16 +13,23 @@
     },
     "license": "UNLICENSED",
     "dependencies": {
+        "@aws-sdk/client-ses": "^3.310.0",
+        "@aws-sdk/client-ssm": "^3.310.0",
+        "@washingtonpost/carta-client-lib": "^0.8.4",
+        "cross-fetch": "^3.1.5",
+        "dotenv": "^16.0.3",
+        "mongo-db": "^1.0.2",
+        "opsgenie-sdk": "^0.5.1",
         "typescript": "^3.5.3"
     },
     "devDependencies": {
         "@typescript-eslint/eslint-plugin": "^5.58.0",
         "@typescript-eslint/parser": "^5.58.0",
         "eslint": "^8.38.0",
+        "husky": "^8.0.0",
         "prettier": "^2.8.7",
         "serverless-plugin-typescript": "^1.1.7",
         "serverless-stack-output": "^0.2.3",
-        "tslint": "^5.18.0",
-        "husky": "^8.0.0"
+        "tslint": "^5.18.0"
     }
 }
