@@ -24,3 +24,10 @@ functions:
             STAGE: ${opt:stage, "local"}
         events:
             - schedule: rate(10 minutes)
+    testAlert:
+        handler: src/functions/testAlert.testAlert
+        description: Healthcheck to ensure we can send alerts
+        environment:
+            STAGE: ${opt:stage, "local"}
+        events:
+            - schedule: rate(10 minutes)

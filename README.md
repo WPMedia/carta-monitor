@@ -2,4 +2,6 @@
 
 ## Offline Testing
 
--   `serverless invoke local --function healthcheck`
+-   `serverless invoke local --function sendScheduling`
+-   `serverless invoke local --function ses`
+-   `serverless invoke local --function testAlert`
