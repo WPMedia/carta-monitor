@@ -6,7 +6,7 @@ plugins:
 
 provider:
     name: aws
-    runtime: nodejs16.x
+    runtime: nodejs14.x
     region: us-east-1
 
 functions:
@@ -27,6 +27,20 @@ functions:
     testAlert:
         handler: src/functions/testAlert.testAlert
         description: Healthcheck to ensure we can send alerts
+        environment:
+            STAGE: ${opt:stage, "local"}
+        events:
+            - schedule: rate(10 minutes)
+    metricsProcessing:
+        handler: src/functions/metricsProcessing.checkMetricsProcessing
+        description: Healthcheck to ensure metrics process
+        environment:
+            STAGE: ${opt:stage, "local"}
+        events:
+            - schedule: rate(10 minutes)
+    fileDownloadProcessing:
+        handler: src/functions/fileDownloadProcessing.checkFileDownloadProcessing
+        description: Healthcheck to ensure file downloads are processing
         environment:
             STAGE: ${opt:stage, "local"}
         events:

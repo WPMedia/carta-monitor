@@ -38,20 +38,20 @@ const sendTestEmail = async (region: "us-east-1" | "us-west-2") => {
     console.log(`Email sent: ${response.MessageId}`);
 };
 
-module.exports.ses = async () => {
+export const ses = async () => {
     try {
         await sendTestEmail("us-east-1");
-        await closeAlert(CartaAlerts.Ses_UsEast1_Failed);
+        await closeAlert(CartaAlerts.Ses_UsEast1);
     } catch (error) {
         console.error(`Failed to send test email to us-east-1: ${error}`);
-        await createAlert(CartaAlerts.Ses_UsEast1_Failed);
+        await createAlert(CartaAlerts.Ses_UsEast1);
     }
 
     try {
         await sendTestEmail("us-west-2");
-        await closeAlert(CartaAlerts.Ses_UsWest2_Failed);
+        await closeAlert(CartaAlerts.Ses_UsWest2);
     } catch (error) {
         console.error(`Failed to send test email to us-west-2: ${error}`);
-        await createAlert(CartaAlerts.Ses_UsWest2_Failed);
+        await createAlert(CartaAlerts.Ses_UsWest2);
     }
 };

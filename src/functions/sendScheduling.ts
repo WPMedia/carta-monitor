@@ -33,18 +33,18 @@ const createAndSendLetter = async (
     console.log(`Scheduled send for letter ${letterId}`);
 };
 
-module.exports.sendScheduling = async () => {
+export const sendScheduling = async () => {
     try {
         await createAndSendLetter(
             "nonPersonalized",
             process.env.NONPERSONALIZED_CAMPAIGN_ID as string
         );
-        await closeAlert(CartaAlerts.Schedule_Nonpersonalized_Send_Failed);
+        await closeAlert(CartaAlerts.Schedule_Nonpersonalized_Send);
     } catch (error) {
         console.error(
             `Failed to schedule send of nonPersonalized letter ${error}`
         );
-        await createAlert(CartaAlerts.Schedule_Nonpersonalized_Send_Failed);
+        await createAlert(CartaAlerts.Schedule_Nonpersonalized_Send);
         throw error;
     }
 
@@ -54,12 +54,12 @@ module.exports.sendScheduling = async () => {
             "personalized",
             process.env.PERSONALIZED_CAMPAIGN_ID as string
         );
-        await closeAlert(CartaAlerts.Schedule_Personalized_Send_Failed);
+        await closeAlert(CartaAlerts.Schedule_Personalized_Send);
     } catch (error) {
         console.error(
             `Failed to schedule send of personalized letter ${error}`
         );
-        await createAlert(CartaAlerts.Schedule_Personalized_Send_Failed);
+        await createAlert(CartaAlerts.Schedule_Personalized_Send);
         throw error;
     }
 
@@ -69,10 +69,10 @@ module.exports.sendScheduling = async () => {
             "transactional",
             process.env.TRANSACTIONAL_CAMPAIGN_ID as string
         );
-        await closeAlert(CartaAlerts.Schedule_Transactional_Send_Failed);
+        await closeAlert(CartaAlerts.Schedule_Transactional_Send);
     } catch (error) {
         console.error(`Failed to schedule send of nonPers letter ${error}`);
-        await createAlert(CartaAlerts.Schedule_Transactional_Send_Failed);
+        await createAlert(CartaAlerts.Schedule_Transactional_Send);
         throw error;
     }
 

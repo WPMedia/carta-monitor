@@ -1,7 +1,8 @@
 import { GetParameterCommand, SSMClient } from "@aws-sdk/client-ssm";
 import { CartaAlerts, closeAlert, createAlert } from "../opsGenieHelpers";
+import fetch from "cross-fetch"; // Using node-fetch for compatibility with Node.js
 
-module.exports.testAlert = async () => {
+export const testAlert = async () => {
     try {
         // Alert send via list management
         const ssmClient = new SSMClient({
@@ -42,7 +43,7 @@ module.exports.testAlert = async () => {
         };
         if (success) {
             console.log("Successfully sent alert");
-            await closeAlert(CartaAlerts.Alert_Send_Failed);
+            await closeAlert(CartaAlerts.Alert_Send);
             return;
         }
         throw new Error(
@@ -50,6 +51,6 @@ module.exports.testAlert = async () => {
         );
     } catch (error) {
         console.error(`Failed to send alert: ${error}`);
-        await createAlert(CartaAlerts.Alert_Send_Failed);
+        await createAlert(CartaAlerts.Alert_Send);
     }
 };
