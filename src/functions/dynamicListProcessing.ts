@@ -4,7 +4,7 @@ import { CartaAlerts, createAlert } from "../opsGenieHelpers";
 import { DateTime } from "luxon";
 
 /**
-Generates alerts or logs messages for tardy lists based on the provided filter and alert type.
+Generates alerts for tardy lists based on the provided filter and alert type.
 @param {Collection<any>} lmListsCollection - The collection of lists to query.
 @param {Filter<Document>} filter - The filter to apply when querying the lists collection.
 @param {CartaAlerts} alertType - The type of alert to be generated.
