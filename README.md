@@ -7,3 +7,4 @@
 -   `serverless invoke local --function testAlert`
 -   `serverless invoke local --function metricsProcessing`
 -   `serverless invoke local --function fileDownloadProcessing`
+-   `serverless invoke local --function dynamicListProcessing`

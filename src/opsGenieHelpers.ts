@@ -16,7 +16,9 @@ export const enum CartaAlerts {
     Ses_UsEast1 = "Ses_UsEast1",
     Ses_UsWest2 = "Ses_UsWest2",
     Metrics_Processing_Above_Threshshold = "Metrics_Processing_Above_Threshshold",
-    File_Download_Processing_Delay = "File_Download_Processing_Delay"
+    File_Download_Processing_Delay = "File_Download_Processing_Delay",
+    Automatic_Dynamic_List = "Automatic_Dynamic_List",
+    Scheduled_Dynamic_List = "Scheduled_Dynamic_List"
 }
 
 interface AlertDetails {
@@ -59,6 +61,14 @@ const alertDetails: { [K in CartaAlerts]: AlertDetails } = {
     [CartaAlerts.File_Download_Processing_Delay]: {
         priority: Priority.P2,
         message: "File download processing is delayed more than 15 mins"
+    },
+    [CartaAlerts.Scheduled_Dynamic_List]: {
+        priority: Priority.P2,
+        message: "Scheduled dynamic list(s) failed to run"
+    },
+    [CartaAlerts.Automatic_Dynamic_List]: {
+        priority: Priority.P2,
+        message: "Auto-running dynamic list(s) failed to run"
     }
 };
 

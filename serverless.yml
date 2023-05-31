@@ -45,3 +45,10 @@ functions:
             STAGE: ${opt:stage, "local"}
         events:
             - schedule: rate(10 minutes)
+    dynamicListProcessing:
+        handler: src/functions/dynamicListProcessing.checkDynamicListProcessing
+        description: Healthcheck to ensure dynamic lists are processing
+        environment:
+            STAGE: ${opt:stage, "local"}
+        events:
+            - schedule: rate(10 minutes)
