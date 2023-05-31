@@ -3,7 +3,15 @@ import { getMongoDatabase } from "../mongo";
 import { CartaAlerts, createAlert } from "../opsGenieHelpers";
 import { DateTime } from "luxon";
 
-const handleTardyLists = async (
+/**
+Generates alerts or logs messages for tardy lists based on the provided filter and alert type.
+@param {Collection<any>} lmListsCollection - The collection of lists to query.
+@param {Filter<Document>} filter - The filter to apply when querying the lists collection.
+@param {CartaAlerts} alertType - The type of alert to be generated.
+@param {string} messagePrefix - The prefix to be included in the alert message.
+@returns - A Promise that resolves when the handling is complete.
+*/
+const generateAlertsForTardyLists = async (
     lmListsCollection: Collection<any>,
     filter: Filter<Document>,
     alertType: CartaAlerts,
@@ -107,7 +115,7 @@ export const checkDynamicListProcessing = async () => {
         ...commonFilter,
         autorun_time: { $in: [null, ""] }
     };
-    await handleTardyLists(
+    await generateAlertsForTardyLists(
         lmListsCollection,
         autoRunningFilter,
         CartaAlerts.Automatic_Dynamic_List,
@@ -123,7 +131,7 @@ export const checkDynamicListProcessing = async () => {
             $gte: startWindowHHmm
         }
     };
-    await handleTardyLists(
+    await generateAlertsForTardyLists(
         lmListsCollection,
         scheduledFilter,
         CartaAlerts.Scheduled_Dynamic_List,
