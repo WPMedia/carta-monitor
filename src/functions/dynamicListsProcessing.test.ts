@@ -3,7 +3,7 @@ import {
     checkDynamicListProcessing,
     getMostRecentQuarterHour
 } from "./dynamicListProcessing";
-import { MongoMemoryServer } from "mongodb-memory-server-global";
+import { MongoMemoryServer } from "mongodb-memory-server";
 import { getMongoDatabase } from "../mongo";
 import { CartaAlerts, createAlert } from "../opsGenieHelpers";
 
@@ -70,11 +70,26 @@ describe("getMostRecentQuarterHour", () => {
 });
 
 describe("checkDynamicListProcessing", () => {
+    let createAlertMock: jest.Mock;
+
+    beforeEach(() => {
+        createAlertMock = createAlert as jest.Mock;
+        createAlertMock.mockClear();
+    });
+
+    afterEach(async () => {
+        const { db, client } = await getMongoDatabase();
+        const lmListsCollection = db.collection("lm_lists");
+        await lmListsCollection.deleteMany({});
+        client.close();
+    });
+
     it("should not create alerts when lists are processing", async () => {
         const { db, client } = await getMongoDatabase();
 
         try {
             const lmListsCollection = db.collection("lm_lists");
+            await lmListsCollection.deleteMany({});
             await lmListsCollection.insertMany([
                 {
                     type: "DYNAMIC",
@@ -111,6 +126,7 @@ describe("checkDynamicListProcessing", () => {
 
         try {
             const lmListsCollection = db.collection("lm_lists");
+            await lmListsCollection.deleteMany({});
 
             const triggerWindow = testingDateTime
                 .minus({ hours: 25, minutes: 31 })
@@ -130,6 +146,10 @@ describe("checkDynamicListProcessing", () => {
                 CartaAlerts.Automatic_Dynamic_List,
                 expect.stringContaining("Sample autorun list")
             );
+            expect(createAlert).not.toHaveBeenCalledWith(
+                CartaAlerts.Scheduled_Dynamic_List,
+                expect.any(String)
+            );
         } finally {
             await client.close();
         }
@@ -140,6 +160,7 @@ describe("checkDynamicListProcessing", () => {
 
         try {
             const lmListsCollection = db.collection("lm_lists");
+            await lmListsCollection.deleteMany({});
 
             const triggerWindow = testingDateTime.minus({
                 hours: 25,
@@ -159,6 +180,10 @@ describe("checkDynamicListProcessing", () => {
             expect(createAlert).toHaveBeenCalledWith(
                 CartaAlerts.Scheduled_Dynamic_List,
                 expect.stringContaining("Sample scheduled list")
+            );
+            expect(createAlert).not.toHaveBeenCalledWith(
+                CartaAlerts.Automatic_Dynamic_List,
+                expect.any(String)
             );
         } finally {
             await client.close();

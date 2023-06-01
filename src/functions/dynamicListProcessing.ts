@@ -22,7 +22,7 @@ const generateAlertsForTardyLists = async (
 
     if (tardyListNames.length > 0) {
         const message = `${messagePrefix}: ${tardyListNames.join(",")}`;
-        console.log(message);
+        console.log(`Creating alert: ${message}`);
         createAlert(alertType, message);
         return;
     }
