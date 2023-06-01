@@ -15,7 +15,7 @@ let mongo: MongoMemoryServer;
 
 const testingDateTime = DateTime.local(2023, 5, 30, 0, 0, 0);
 
-beforeAll(async () => {
+beforeEach(async () => {
     mongo = await MongoMemoryServer.create();
     const uri = mongo.getUri();
     process.env.MONGODB_URI = uri;
@@ -24,14 +24,17 @@ beforeAll(async () => {
     Settings.now = () => testingDateTime.toMillis();
 });
 
-afterAll(async () => {
+afterEach(async () => {
     await mongo.stop();
 });
 
 describe("getMostRecentQuarterHour", () => {
-    it("handles edge cases near the top of the hour", () => {
-        const time = DateTime.fromISO("2023-05-31T10:59:59.999");
-        const mostRecentQuarterHour = getMostRecentQuarterHour(time);
+    const topOfHourTime = DateTime.fromISO("2023-05-31T10:59:59.999");
+    const quarterHourTime = DateTime.fromISO("2023-05-31T10:14:59.999");
+    const exactQuarterHourTime = DateTime.fromISO("2023-05-31T10:15:00.000");
+
+    it("returns the most recent quarter hour near the top of the hour", () => {
+        const mostRecentQuarterHour = getMostRecentQuarterHour(topOfHourTime);
 
         expect(mostRecentQuarterHour.year).toBe(2023);
         expect(mostRecentQuarterHour.month).toBe(5);
@@ -42,9 +45,8 @@ describe("getMostRecentQuarterHour", () => {
         expect(mostRecentQuarterHour.millisecond).toBe(0);
     });
 
-    it("handles edge cases near the quarter hour", () => {
-        const time = DateTime.fromISO("2023-05-31T10:14:59.999");
-        const mostRecentQuarterHour = getMostRecentQuarterHour(time);
+    it("returns the most recent quarter hour near the quarter hour", () => {
+        const mostRecentQuarterHour = getMostRecentQuarterHour(quarterHourTime);
 
         expect(mostRecentQuarterHour.year).toBe(2023);
         expect(mostRecentQuarterHour.month).toBe(5);
@@ -55,9 +57,9 @@ describe("getMostRecentQuarterHour", () => {
         expect(mostRecentQuarterHour.millisecond).toBe(0);
     });
 
-    it("handles edge cases exactly on the quarter hour", () => {
-        const time = DateTime.fromISO("2023-05-31T10:15:00.000");
-        const mostRecentQuarterHour = getMostRecentQuarterHour(time);
+    it("returns the most recent quarter hour exactly on the quarter hour", () => {
+        const mostRecentQuarterHour =
+            getMostRecentQuarterHour(exactQuarterHourTime);
 
         expect(mostRecentQuarterHour.year).toBe(2023);
         expect(mostRecentQuarterHour.month).toBe(5);
@@ -84,7 +86,7 @@ describe("checkDynamicListProcessing", () => {
         client.close();
     });
 
-    it("should not create alerts when lists are processing", async () => {
+    it("does not create alerts when lists are processing", async () => {
         const { db, client } = await getMongoDatabase();
 
         try {
@@ -111,17 +113,15 @@ describe("checkDynamicListProcessing", () => {
 
             await checkDynamicListProcessing();
 
-            // Check if the lists were added correctly
             const processedLists = await lmListsCollection.countDocuments();
             expect(processedLists).toBe(2);
-
             expect(createAlert).not.toHaveBeenCalled();
         } finally {
             await client.close();
         }
     });
 
-    it("should create an alert when an auto-run list is not processing", async () => {
+    it("creates an alert when an auto-run list is not processing", async () => {
         const { db, client } = await getMongoDatabase();
 
         try {
@@ -155,7 +155,7 @@ describe("checkDynamicListProcessing", () => {
         }
     });
 
-    it("should create an alert when a scheduled list is not processing", async () => {
+    it("creates an alert when a scheduled list is not processing", async () => {
         const { db, client } = await getMongoDatabase();
 
         try {
