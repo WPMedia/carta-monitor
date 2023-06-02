@@ -45,6 +45,7 @@ export const getParametersFromSSM = async (
             });
         } catch (error) {
             console.error(`Failed to fetch ${key} from SSM: ${error}`);
+            throw error;
         }
     }
 

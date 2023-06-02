@@ -6,12 +6,15 @@ import {
 import { MongoMemoryServer } from "mongodb-memory-server";
 import { getMongoDatabase } from "../mongo";
 import { CartaAlerts, createAlert } from "../opsGenieHelpers";
+import { Db, MongoClient } from "mongodb";
 
 jest.mock("../opsGenieHelpers", () => ({
     createAlert: jest.fn()
 }));
 
 let mongo: MongoMemoryServer;
+let db: Db;
+let client: MongoClient;
 
 const testingDateTime = DateTime.local(2023, 5, 30, 0, 0, 0);
 
@@ -21,10 +24,17 @@ beforeEach(async () => {
     process.env.MONGODB_URI = uri;
     process.env.MONGODB_NAME = "test-db";
 
+    const connection = await getMongoDatabase();
+
+    db = connection.db;
+    client = connection.client;
+
     Settings.now = () => testingDateTime.toMillis();
 });
 
 afterEach(async () => {
+    await db.collection("nlSend").deleteMany({});
+    await client.close();
     await mongo.stop();
 });
 
@@ -80,113 +90,94 @@ describe("checkDynamicListProcessing", () => {
     });
 
     afterEach(async () => {
-        const { db, client } = await getMongoDatabase();
         const lmListsCollection = db.collection("lm_lists");
         await lmListsCollection.deleteMany({});
         client.close();
     });
 
     it("does not create alerts when lists are processing", async () => {
-        const { db, client } = await getMongoDatabase();
+        const lmListsCollection = db.collection("lm_lists");
+        await lmListsCollection.deleteMany({});
+        await lmListsCollection.insertMany([
+            {
+                type: "DYNAMIC",
+                enabled: true,
+                autorun: true,
+                message: "Sample dynamic list 1",
+                updated_time: "2023-05-28T10:30:00.000Z",
+                autorun_time: null
+            },
+            {
+                type: "DYNAMIC",
+                enabled: true,
+                autorun: true,
+                message: "Sample dynamic list 2",
+                updated_time: "2023-05-28T10:45:00.000Z",
+                autorun_time: "1000"
+            }
+        ]);
 
-        try {
-            const lmListsCollection = db.collection("lm_lists");
-            await lmListsCollection.deleteMany({});
-            await lmListsCollection.insertMany([
-                {
-                    type: "DYNAMIC",
-                    enabled: true,
-                    autorun: true,
-                    message: "Sample dynamic list 1",
-                    updated_time: "2023-05-28T10:30:00.000Z",
-                    autorun_time: null
-                },
-                {
-                    type: "DYNAMIC",
-                    enabled: true,
-                    autorun: true,
-                    message: "Sample dynamic list 2",
-                    updated_time: "2023-05-28T10:45:00.000Z",
-                    autorun_time: "1000"
-                }
-            ]);
+        await checkDynamicListProcessing();
 
-            await checkDynamicListProcessing();
-
-            const processedLists = await lmListsCollection.countDocuments();
-            expect(processedLists).toBe(2);
-            expect(createAlert).not.toHaveBeenCalled();
-        } finally {
-            await client.close();
-        }
+        const processedLists = await lmListsCollection.countDocuments();
+        expect(processedLists).toBe(2);
+        expect(createAlert).not.toHaveBeenCalled();
     });
 
     it("creates an alert when an auto-run list is not processing", async () => {
-        const { db, client } = await getMongoDatabase();
+        const lmListsCollection = db.collection("lm_lists");
+        await lmListsCollection.deleteMany({});
 
-        try {
-            const lmListsCollection = db.collection("lm_lists");
-            await lmListsCollection.deleteMany({});
+        const triggerWindow = testingDateTime
+            .minus({ hours: 25, minutes: 31 })
+            .toISO();
+        await lmListsCollection.insertOne({
+            name: "Sample autorun list",
+            type: "DYNAMIC",
+            enabled: true,
+            autorun: true,
+            updated_time: triggerWindow,
+            autorun_time: ""
+        });
 
-            const triggerWindow = testingDateTime
-                .minus({ hours: 25, minutes: 31 })
-                .toISO();
-            await lmListsCollection.insertOne({
-                name: "Sample autorun list",
-                type: "DYNAMIC",
-                enabled: true,
-                autorun: true,
-                updated_time: triggerWindow,
-                autorun_time: ""
-            });
+        await checkDynamicListProcessing();
 
-            await checkDynamicListProcessing();
-
-            expect(createAlert).toHaveBeenCalledWith(
-                CartaAlerts.Automatic_Dynamic_List,
-                expect.stringContaining("Sample autorun list")
-            );
-            expect(createAlert).not.toHaveBeenCalledWith(
-                CartaAlerts.Scheduled_Dynamic_List,
-                expect.any(String)
-            );
-        } finally {
-            await client.close();
-        }
+        expect(createAlert).toHaveBeenCalledWith(
+            CartaAlerts.Automatic_Dynamic_List,
+            expect.stringContaining("Sample autorun list")
+        );
+        expect(createAlert).not.toHaveBeenCalledWith(
+            CartaAlerts.Scheduled_Dynamic_List,
+            expect.any(String)
+        );
     });
 
     it("creates an alert when a scheduled list is not processing", async () => {
-        const { db, client } = await getMongoDatabase();
+        const lmListsCollection = db.collection("lm_lists");
+        await lmListsCollection.deleteMany({});
 
-        try {
-            const lmListsCollection = db.collection("lm_lists");
-            await lmListsCollection.deleteMany({});
+        const triggerWindow = testingDateTime.minus({
+            hours: 25,
+            minutes: 31
+        });
+        await lmListsCollection.insertOne({
+            name: "Sample scheduled list",
+            type: "DYNAMIC",
+            enabled: true,
+            autorun: true,
+            updated_time: triggerWindow.toISO(),
+            autorun_time: triggerWindow.toFormat("HHmm")
+        });
 
-            const triggerWindow = testingDateTime.minus({
-                hours: 25,
-                minutes: 31
-            });
-            await lmListsCollection.insertOne({
-                name: "Sample scheduled list",
-                type: "DYNAMIC",
-                enabled: true,
-                autorun: true,
-                updated_time: triggerWindow.toISO(),
-                autorun_time: triggerWindow.toFormat("HHmm")
-            });
+        await checkDynamicListProcessing();
 
-            await checkDynamicListProcessing();
-
-            expect(createAlert).toHaveBeenCalledWith(
-                CartaAlerts.Scheduled_Dynamic_List,
-                expect.stringContaining("Sample scheduled list")
-            );
-            expect(createAlert).not.toHaveBeenCalledWith(
-                CartaAlerts.Automatic_Dynamic_List,
-                expect.any(String)
-            );
-        } finally {
-            await client.close();
-        }
+        expect(createAlert).toHaveBeenCalledWith(
+            CartaAlerts.Scheduled_Dynamic_List,
+            expect.stringContaining("Sample scheduled list")
+        );
+        expect(createAlert).not.toHaveBeenCalledWith(
+            CartaAlerts.Automatic_Dynamic_List,
+            expect.any(String)
+        );
     });
 });

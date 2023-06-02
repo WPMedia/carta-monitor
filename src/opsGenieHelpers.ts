@@ -18,7 +18,8 @@ export const enum CartaAlerts {
     Metrics_Processing_Above_Threshshold = "Metrics_Processing_Above_Threshshold",
     File_Download_Processing_Delay = "File_Download_Processing_Delay",
     Automatic_Dynamic_List = "Automatic_Dynamic_List",
-    Scheduled_Dynamic_List = "Scheduled_Dynamic_List"
+    Scheduled_Dynamic_List = "Scheduled_Dynamic_List",
+    Multiple_Campaign_Send_Delay = "Multiple_Campaign_Send_Delay"
 }
 
 interface AlertDetails {
@@ -69,6 +70,10 @@ const alertDetails: { [K in CartaAlerts]: AlertDetails } = {
     [CartaAlerts.Automatic_Dynamic_List]: {
         priority: Priority.P2,
         message: "Auto-running dynamic list(s) failed to run"
+    },
+    [CartaAlerts.Multiple_Campaign_Send_Delay]: {
+        priority: Priority.P1,
+        message: "Email send of multiple campaigns is delayed."
     }
 };
 
@@ -142,5 +147,20 @@ export async function closeAlert(alias: keyof typeof CartaAlerts) {
         }
     );
     console.log("Alert closed successfully: " + JSON.stringify(json));
+    return json;
+}
+
+export async function escalateAlert(
+    alias: keyof typeof CartaAlerts,
+    newPriority: keyof typeof Priority
+) {
+    const json = await makeOpsGenieRequest(
+        `https://api.opsgenie.com/v2/alerts/${alias}?identifierType=alias`,
+        "PATCH",
+        {
+            priority: newPriority
+        }
+    );
+    console.log("Alert escalated successfully: " + JSON.stringify(json));
     return json;
 }

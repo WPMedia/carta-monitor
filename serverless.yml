@@ -52,3 +52,10 @@ functions:
             STAGE: ${opt:stage, "local"}
         events:
             - schedule: rate(10 minutes)
+    campaignSendAlerts:
+        handler: src/functions/campaignSendAlerts.campaignSendAlerts
+        description: todo
+        environment:
+            STAGE: ${opt:stage, "local"}
+        events:
+            - schedule: rate(10 minutes)

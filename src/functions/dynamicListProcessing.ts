@@ -28,9 +28,7 @@ const generateAlertsForTardyLists = async (
     }
     console.log(
         `Success: no results found when calling filter \n ${JSON.stringify(
-            filter,
-            null,
-            2
+            filter
         )}`
     );
 };
