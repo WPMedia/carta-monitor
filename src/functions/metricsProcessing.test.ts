@@ -1,4 +1,4 @@
-import { CartaAlerts, closeAlert, createAlert } from "../opsGenieHelpers";
+import { CartaAlerts, closeOpenAlert, createAlert } from "../opsGenieHelpers";
 import { checkMetricsProcessing } from "./metricsProcessing";
 
 process.env.MONGODB_URI = "mongodb://localhost:27017/{0}";
@@ -9,7 +9,7 @@ jest.mock("../helpers", () => ({
 }));
 
 jest.mock("../opsGenieHelpers", () => ({
-    closeAlert: jest.fn(),
+    closeOpenAlert: jest.fn(),
     createAlert: jest.fn(),
     CartaAlerts: {
         Metrics_Processing_Above_Threshshold: "mockAlert"
@@ -64,7 +64,7 @@ describe("checkMetricsProcessing", () => {
         expect(createAlert).toHaveBeenCalledWith(
             CartaAlerts.Metrics_Processing_Above_Threshshold
         );
-        expect(closeAlert).not.toHaveBeenCalled();
+        expect(closeOpenAlert).not.toHaveBeenCalled();
     });
 
     test("calls closeAlert when estimatedDocumentCount is below the threshold", async () => {
@@ -72,7 +72,7 @@ describe("checkMetricsProcessing", () => {
 
         await checkMetricsProcessing();
 
-        expect(closeAlert).toHaveBeenCalledWith(
+        expect(closeOpenAlert).toHaveBeenCalledWith(
             CartaAlerts.Metrics_Processing_Above_Threshshold
         );
         expect(createAlert).not.toHaveBeenCalled();

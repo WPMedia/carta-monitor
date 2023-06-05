@@ -13,6 +13,14 @@ export const enum CartaAlerts {
     Schedule_Personalized_Send = "Schedule_Personalized_Send",
     Schedule_Nonpersonalized_Send = "Schedule_Nonpersonalized_Send",
     Alert_Send = "Alert_Send",
+    No_Transactional_Sends_15_Minutes = "No_Transactional_Sends_15_Minutes",
+    No_Personalized_Sends_15_Minutes = "No_Personalized_Sends_15_Minutes",
+    No_NonpersonalizedSends_15_Minutes = "No_NonpersonalizedSends_15_Minutes",
+    No_Alerts_15_Minutes = "No_Alerts_15_Minutes",
+    No_Transactional_Sends_30_Minutes = "No_Transactional_Sends_30_Minutes",
+    No_Personalized_Sends_30_Minutes = "No_Personalized_Sends_30_Minutes",
+    No_NonpersonalizedSends_30_Minutes = "No_NonpersonalizedSends_30_Minutes",
+    No_Alerts_30_Minutes = "No_Alerts_30_Minutes",
     Ses_UsEast1 = "Ses_UsEast1",
     Ses_UsWest2 = "Ses_UsWest2",
     Metrics_Processing_Above_Threshshold = "Metrics_Processing_Above_Threshshold",
@@ -30,28 +38,60 @@ interface AlertDetails {
 
 const alertDetails: { [K in CartaAlerts]: AlertDetails } = {
     [CartaAlerts.Schedule_Transactional_Send]: {
-        priority: Priority.P3,
-        message: "Test alert, please ignore"
+        priority: Priority.P2,
+        message: "Unable to schedule a transactional send"
     },
     [CartaAlerts.Schedule_Personalized_Send]: {
-        priority: Priority.P3,
-        message: "Test alert, please ignore"
+        priority: Priority.P2,
+        message: "Unable to send a personalized send"
     },
     [CartaAlerts.Schedule_Nonpersonalized_Send]: {
-        priority: Priority.P3,
-        message: "Test alert, please ignore"
+        priority: Priority.P2,
+        message: "Unable to send a nonpersonalized send"
     },
     [CartaAlerts.Alert_Send]: {
-        priority: Priority.P3,
+        priority: Priority.P1,
         message: "Test alert, please ignore"
+    },
+    [CartaAlerts.No_Transactional_Sends_15_Minutes]: {
+        priority: Priority.P2,
+        message: "Viewers don’t receive transactional emails in last 15 mins"
+    },
+    [CartaAlerts.No_Personalized_Sends_15_Minutes]: {
+        priority: Priority.P2,
+        message: "Viewers don’t receive personalized emails in last 15 mins"
+    },
+    [CartaAlerts.No_NonpersonalizedSends_15_Minutes]: {
+        priority: Priority.P2,
+        message: "Viewers don’t receive nonpersonalized emails in last 15 mins"
+    },
+    [CartaAlerts.No_Alerts_15_Minutes]: {
+        priority: Priority.P2,
+        message: "Viewers don’t receive alerts in last 15 mins"
+    },
+    [CartaAlerts.No_Transactional_Sends_30_Minutes]: {
+        priority: Priority.P1,
+        message: "Viewers don’t receive transactional emails in last 30 mins"
+    },
+    [CartaAlerts.No_Personalized_Sends_30_Minutes]: {
+        priority: Priority.P1,
+        message: "Viewers don’t receive personalized emails in last 30 mins"
+    },
+    [CartaAlerts.No_NonpersonalizedSends_30_Minutes]: {
+        priority: Priority.P1,
+        message: "Viewers don’t receive nonpersonalized emails in last 30 mins"
+    },
+    [CartaAlerts.No_Alerts_30_Minutes]: {
+        priority: Priority.P1,
+        message: "Viewers don’t receive alerts in last 30 mins"
     },
     [CartaAlerts.Ses_UsEast1]: {
-        priority: Priority.P3,
-        message: "Test alert, please ignore"
+        priority: Priority.P0,
+        message: "Unable to send email to us-east-1"
     },
     [CartaAlerts.Ses_UsWest2]: {
-        priority: Priority.P3,
-        message: "Test alert, please ignore"
+        priority: Priority.P0,
+        message: "Unable to send email to us-west-2"
     },
     [CartaAlerts.Metrics_Processing_Above_Threshshold]: {
         priority: Priority.P2,
@@ -82,44 +122,47 @@ type HttpMethod = "GET" | "POST" | "PUT" | "DELETE" | "PATCH" | "OPTIONS";
 async function makeOpsGenieRequest(
     url: string,
     method: HttpMethod,
-    data: any
+    data?: any
 ): Promise<{
     result: string;
     took: number;
     requestId: string;
+    data?: { count: number };
 }> {
-    try {
-        const key = (await getParametersFromSSM(["ops.genie.api.key"]))[0]
-            .value;
+    const key = (await getParametersFromSSM(["ops.genie.api.key"]))[0].value;
 
-        const response = await fetch(url, {
-            method: method,
-            headers: {
-                Authorization: `GenieKey ${key}`,
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify(data)
-        });
+    const response = await fetch(url, {
+        method: method,
+        headers: {
+            Authorization: `GenieKey ${key}`,
+            "Content-Type": "application/json"
+        },
+        body: !data ? undefined : JSON.stringify(data)
+    });
 
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-        }
-
-        const json = (await response.json()) as {
-            result: string;
-            took: number;
-            requestId: string;
-        };
-        return json;
-    } catch (error) {
-        console.error(`An error occurred while making the request: ${error}`);
+    if (!response.ok) {
+        throw response;
     }
+
+    const json = (await response.json()) as {
+        result: string;
+        took: number;
+        requestId: string;
+    };
+    return json;
 }
 
 export async function createAlert(
     alias: keyof typeof CartaAlerts,
     customDescription?: string
 ) {
+    if (process.env.IS_LOCAL) {
+        console.log(
+            `Alert on local: ${JSON.stringify({ alias, customDescription })}`
+        );
+        return;
+    }
+
     const { message, priority, description } = alertDetails[alias];
     const json = await makeOpsGenieRequest(
         "https://api.opsgenie.com/v2/alerts",
@@ -132,21 +175,39 @@ export async function createAlert(
             priority
         }
     );
-    console.log("Alert created successfully: " + JSON.stringify(json));
+    console.log(`Alert ${alias} created successfully: ${JSON.stringify(json)}`);
     return json;
 }
 
-export async function closeAlert(alias: keyof typeof CartaAlerts) {
+async function isAlertCurrentlyOpen(alias: keyof typeof CartaAlerts) {
+    try {
+        const json = await makeOpsGenieRequest(
+            `https://api.opsgenie.com/v2/alerts/${alias}?identifierType=alias`,
+            "GET"
+        );
+        return json?.data?.count > 0;
+    } catch (error: unknown) {
+        if ((error as Response).status === 404) return false;
+        throw error;
+    }
+}
+
+export async function closeOpenAlert(alias: keyof typeof CartaAlerts) {
+    const isOpen = await isAlertCurrentlyOpen(alias);
+    if (!isOpen) {
+        return;
+    }
+
     const json = await makeOpsGenieRequest(
         `https://api.opsgenie.com/v2/alerts/${alias}/close?identifierType=alias`,
         "POST",
         {
             body: {
-                note: "Closing the alert automatically"
+                note: "Closing the alert via api called in carta-monitor"
             }
         }
     );
-    console.log("Alert closed successfully: " + JSON.stringify(json));
+    console.log(`Closed alert ${alias}: ${JSON.stringify(json)}`);
     return json;
 }
 
@@ -154,6 +215,7 @@ export async function escalateAlert(
     alias: keyof typeof CartaAlerts,
     newPriority: keyof typeof Priority
 ) {
+    console.log(process.env);
     const json = await makeOpsGenieRequest(
         `https://api.opsgenie.com/v2/alerts/${alias}?identifierType=alias`,
         "PATCH",
@@ -161,6 +223,10 @@ export async function escalateAlert(
             priority: newPriority
         }
     );
-    console.log("Alert escalated successfully: " + JSON.stringify(json));
+    console.log(
+        `Alert ${alias} escalated successfully to ${newPriority}: ${JSON.stringify(
+            json
+        )}`
+    );
     return json;
 }

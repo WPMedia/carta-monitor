@@ -3,7 +3,7 @@ import { getMongoDatabase } from "../mongo";
 import { DateTime } from "luxon";
 import {
     CartaAlerts,
-    closeAlert,
+    closeOpenAlert,
     createAlert,
     escalateAlert
 } from "../opsGenieHelpers";
@@ -17,6 +17,7 @@ export type NewsletterSend = {
     sendState: SendState;
     statusWaitTimestamp: number;
     totalSendSize: number;
+    statusDoneTimestamp: Date;
 };
 
 export type SendState = "done" | "warning" | "alarm";
@@ -117,7 +118,7 @@ export const updateSendState = async (
 export const campaignSendAlerts = async () => {
     const { db, client } = await getMongoDatabase();
 
-    const nlSend: Collection<NewsletterSend> = db.collection("nlSend");
+    const nlSend = db.collection<NewsletterSend>("nlSend");
 
     // nlSend records that have been scheduled to send in the last 24 hours
     // Ideally, we'd use scheduledSendTime, but that field is not indexed on nlSend,
@@ -171,11 +172,6 @@ export const campaignSendAlerts = async () => {
         }
     });
 
-    console.log(
-        doneCampaignLetterIds.length,
-        warningCampaignLetterIds.length,
-        alarmCampaignLetterIds.length
-    );
     await updateSendState(nlSend, doneCampaignLetterIds, "done");
     await updateSendState(nlSend, warningCampaignLetterIds, "warning");
     await updateSendState(nlSend, alarmCampaignLetterIds, "alarm");
@@ -184,7 +180,7 @@ export const campaignSendAlerts = async () => {
         warningCampaignLetterIds.length <= 1 &&
         alarmCampaignLetterIds.length === 0
     ) {
-        closeAlert(CartaAlerts.Multiple_Campaign_Send_Delay);
+        closeOpenAlert(CartaAlerts.Multiple_Campaign_Send_Delay);
     }
 
     if (warningCampaignLetterIds.length > 1) {

@@ -1,5 +1,5 @@
 import { getMongoDatabase } from "../mongo";
-import { CartaAlerts, closeAlert, createAlert } from "../opsGenieHelpers";
+import { CartaAlerts, closeOpenAlert, createAlert } from "../opsGenieHelpers";
 
 export const checkFileDownloadProcessing = async () => {
     const { db, client } = await getMongoDatabase();
@@ -16,7 +16,7 @@ export const checkFileDownloadProcessing = async () => {
         .toArray();
 
     if (submittedDownloadList.length === 0) {
-        closeAlert(CartaAlerts.File_Download_Processing_Delay);
+        closeOpenAlert(CartaAlerts.File_Download_Processing_Delay);
         await client.close();
         return {
             statusCode: 200,

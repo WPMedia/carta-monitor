@@ -1,5 +1,5 @@
 import { getMongoDatabase } from "../mongo";
-import { CartaAlerts, closeAlert, createAlert } from "../opsGenieHelpers";
+import { CartaAlerts, closeOpenAlert, createAlert } from "../opsGenieHelpers";
 
 // Our events collection reaches a peak size of approximately 13 million when the Post Most and our massive marketing
 // send (with 2.7 million recipients) are dispatched around the same time.
@@ -18,7 +18,7 @@ export const checkMetricsProcessing = async () => {
         const eventsCount = await eventsCollection.estimatedDocumentCount();
 
         if (eventsCount < eventsCountAlertThreshold) {
-            closeAlert(CartaAlerts.Metrics_Processing_Above_Threshshold);
+            closeOpenAlert(CartaAlerts.Metrics_Processing_Above_Threshshold);
         } else {
             console.log(
                 "above the events collection count threshold; opening alert"

@@ -9,3 +9,4 @@
 -   `serverless invoke local --function fileDownloadProcessing`
 -   `serverless invoke local --function dynamicListProcessing`
 -   `serverless invoke local --function campaignSendAlerts`
+-   `serverless invoke local --function send`

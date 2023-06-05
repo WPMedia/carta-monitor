@@ -1,8 +1,8 @@
 import * as dotenv from "dotenv";
 dotenv.config();
-import Carta, { CartaServer } from "@washingtonpost/carta-client-lib";
 import { DateTime } from "luxon";
-import { CartaAlerts, closeAlert, createAlert } from "../opsGenieHelpers";
+import { CartaAlerts, closeOpenAlert, createAlert } from "../opsGenieHelpers";
+import { getCartaServer } from "../cartaServer";
 
 const createAndSendLetter = async (
     letterType: "nonPersonalized" | "personalized" | "transactional",
@@ -14,9 +14,8 @@ const createAndSendLetter = async (
     const letterName = `p0-${letterType}-${formattedDate}`;
     console.log(`Creating letter ${letterName} on campaign ${campaignId}`);
 
-    const server = new CartaServer(
-        process.env.STAGE === "prod" ? Carta.Servers.PROD : Carta.Servers.TEST
-    );
+    const server = getCartaServer();
+
     const letterId = (await server.Letters.createLetter(letterName, campaignId))
         .updatedDocId as string;
     console.log(`Created letter ${letterId} on campaign ${campaignId}`);
@@ -30,7 +29,7 @@ const createAndSendLetter = async (
 
     if (!successfulScheduleSend)
         throw new Error("Send letter endpoint returned a failure");
-    console.log(`Scheduled send for letter ${letterId}`);
+    console.log(`Scheduled send for ${letterType} letter ${letterId}`);
 };
 
 export const sendScheduling = async () => {
@@ -39,7 +38,7 @@ export const sendScheduling = async () => {
             "nonPersonalized",
             process.env.NONPERSONALIZED_CAMPAIGN_ID as string
         );
-        await closeAlert(CartaAlerts.Schedule_Nonpersonalized_Send);
+        await closeOpenAlert(CartaAlerts.Schedule_Nonpersonalized_Send);
     } catch (error) {
         console.error(
             `Failed to schedule send of nonPersonalized letter ${error}`
@@ -54,7 +53,7 @@ export const sendScheduling = async () => {
             "personalized",
             process.env.PERSONALIZED_CAMPAIGN_ID as string
         );
-        await closeAlert(CartaAlerts.Schedule_Personalized_Send);
+        await closeOpenAlert(CartaAlerts.Schedule_Personalized_Send);
     } catch (error) {
         console.error(
             `Failed to schedule send of personalized letter ${error}`
@@ -69,7 +68,7 @@ export const sendScheduling = async () => {
             "transactional",
             process.env.TRANSACTIONAL_CAMPAIGN_ID as string
         );
-        await closeAlert(CartaAlerts.Schedule_Transactional_Send);
+        await closeOpenAlert(CartaAlerts.Schedule_Transactional_Send);
     } catch (error) {
         console.error(`Failed to schedule send of nonPers letter ${error}`);
         await createAlert(CartaAlerts.Schedule_Transactional_Send);

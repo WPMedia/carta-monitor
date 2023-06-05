@@ -1,5 +1,5 @@
 import { SESClient, SendEmailCommand } from "@aws-sdk/client-ses";
-import { CartaAlerts, closeAlert, createAlert } from "../opsGenieHelpers";
+import { CartaAlerts, closeOpenAlert, createAlert } from "../opsGenieHelpers";
 
 const fromEmail = "Carta test<wp.carta.test@gmail.com>"; // Replace with your sender email
 const toEmail = "washpostqa1@gmail.com"; // Replace with your recipient email
@@ -41,7 +41,7 @@ const sendTestEmail = async (region: "us-east-1" | "us-west-2") => {
 export const ses = async () => {
     try {
         await sendTestEmail("us-east-1");
-        await closeAlert(CartaAlerts.Ses_UsEast1);
+        await closeOpenAlert(CartaAlerts.Ses_UsEast1);
     } catch (error) {
         console.error(`Failed to send test email to us-east-1: ${error}`);
         await createAlert(CartaAlerts.Ses_UsEast1);
@@ -49,7 +49,7 @@ export const ses = async () => {
 
     try {
         await sendTestEmail("us-west-2");
-        await closeAlert(CartaAlerts.Ses_UsWest2);
+        await closeOpenAlert(CartaAlerts.Ses_UsWest2);
     } catch (error) {
         console.error(`Failed to send test email to us-west-2: ${error}`);
         await createAlert(CartaAlerts.Ses_UsWest2);

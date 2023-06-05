@@ -12,6 +12,14 @@ jest.mock("../opsGenieHelpers", () => ({
     createAlert: jest.fn()
 }));
 
+jest.mock("../helpers", () => ({
+    getParametersFromSSM: jest.fn().mockReturnValue([
+        {
+            "mongodb.password": "testpassword"
+        }
+    ])
+}));
+
 let mongo: MongoMemoryServer;
 let db: Db;
 let client: MongoClient;

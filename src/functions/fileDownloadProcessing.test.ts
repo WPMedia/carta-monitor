@@ -1,9 +1,9 @@
-import { CartaAlerts, closeAlert, createAlert } from "../opsGenieHelpers";
+import { CartaAlerts, closeOpenAlert, createAlert } from "../opsGenieHelpers";
 import { checkFileDownloadProcessing } from "./fileDownloadProcessing";
 import { getMongoDatabase } from "../mongo";
 
 jest.mock("../opsGenieHelpers", () => ({
-    closeAlert: jest.fn(),
+    closeOpenAlert: jest.fn(),
     createAlert: jest.fn(),
     CartaAlerts: {
         File_Download_Processing_Delay: "mockAlert"
@@ -63,7 +63,7 @@ describe("checkFileDownloadProcessing", () => {
             CartaAlerts.File_Download_Processing_Delay,
             "2 file(s) currently processing: list: List 1 user: User 1, list: List 2 user: User 2"
         );
-        expect(closeAlert).not.toHaveBeenCalled();
+        expect(closeOpenAlert).not.toHaveBeenCalled();
         expect(mockCollection.find).toHaveBeenCalledWith({
             status: "submitted",
             created_time: {
@@ -95,7 +95,7 @@ describe("checkFileDownloadProcessing", () => {
 
         await checkFileDownloadProcessing();
 
-        expect(closeAlert).toHaveBeenCalledWith(
+        expect(closeOpenAlert).toHaveBeenCalledWith(
             CartaAlerts.File_Download_Processing_Delay
         );
         expect(createAlert).not.toHaveBeenCalled();

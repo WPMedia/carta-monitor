@@ -9,12 +9,20 @@ import {
 import { Collection, Db, MongoClient, ObjectId } from "mongodb";
 import { getMongoDatabase } from "../mongo";
 import { MongoMemoryServer } from "mongodb-memory-server";
-import { closeAlert, createAlert, escalateAlert } from "../opsGenieHelpers";
+import { closeOpenAlert, createAlert, escalateAlert } from "../opsGenieHelpers";
 
 jest.mock("../opsGenieHelpers", () => ({
-    closeAlert: jest.fn(),
+    closeOpenAlert: jest.fn(),
     createAlert: jest.fn(),
     escalateAlert: jest.fn()
+}));
+
+jest.mock("../helpers", () => ({
+    getParametersFromSSM: jest.fn().mockReturnValue([
+        {
+            "mongodb.password": "testpassword"
+        }
+    ])
 }));
 
 let mongo: MongoMemoryServer;
@@ -23,7 +31,6 @@ let client: MongoClient;
 
 const id1 = new ObjectId();
 const id2 = new ObjectId();
-const id3 = new ObjectId();
 
 beforeEach(async () => {
     mongo = await MongoMemoryServer.create();
@@ -297,7 +304,7 @@ describe("Call alerts", () => {
             }
         ]);
         await campaignSendAlerts();
-        expect(closeAlert).toHaveBeenCalled();
+        expect(closeOpenAlert).toHaveBeenCalled();
 
         const sends = await nlSendCollection.find().toArray();
         const sendStates = sends.map((send) => send.sendState);
