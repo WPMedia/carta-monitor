@@ -33,6 +33,7 @@ const createAndSendLetter = async (
 };
 
 export const sendScheduling = async () => {
+    // Nonpersonalized send
     try {
         await createAndSendLetter(
             "nonPersonalized",

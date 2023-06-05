@@ -186,7 +186,11 @@ export const campaignSendAlerts = async () => {
     if (warningCampaignLetterIds.length > 1) {
         createAlert(
             CartaAlerts.Multiple_Campaign_Send_Delay,
-            `<p><a href="${process.env.CARTA_UI_BASE_URL}status">View</a> campaign send statuses on Carta</p>`
+            `<p><a href="${
+                process.env.CARTA_UI_BASE_URL
+            }status">View</a> campaign send statuses on Carta</p>. Incomplete nlSend ids: "${warningCampaignLetterIds.join(
+                ", "
+            )}"`
         );
     }
 

@@ -43,15 +43,13 @@ export const ses = async () => {
         await sendTestEmail("us-east-1");
         await closeOpenAlert(CartaAlerts.Ses_UsEast1);
     } catch (error) {
-        console.error(`Failed to send test email to us-east-1: ${error}`);
-        await createAlert(CartaAlerts.Ses_UsEast1);
+        await createAlert(CartaAlerts.Ses_UsEast1, error?.message);
     }
 
     try {
         await sendTestEmail("us-west-2");
         await closeOpenAlert(CartaAlerts.Ses_UsWest2);
     } catch (error) {
-        console.error(`Failed to send test email to us-west-2: ${error}`);
-        await createAlert(CartaAlerts.Ses_UsWest2);
+        await createAlert(CartaAlerts.Ses_UsWest2, error?.message);
     }
 };

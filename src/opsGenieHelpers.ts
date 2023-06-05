@@ -1,5 +1,6 @@
 import fetch from "cross-fetch"; // Using node-fetch for compatibility with Node.js
 import { getParametersFromSSM } from "./helpers";
+import { sendFilters } from "./mongo";
 
 export enum Priority {
     P0 = "P0",
@@ -39,59 +40,111 @@ interface AlertDetails {
 const alertDetails: { [K in CartaAlerts]: AlertDetails } = {
     [CartaAlerts.Schedule_Transactional_Send]: {
         priority: Priority.P2,
-        message: "Unable to schedule a transactional send"
+        message: "Failed to schedule a transactional send"
     },
     [CartaAlerts.Schedule_Personalized_Send]: {
         priority: Priority.P2,
-        message: "Unable to send a personalized send"
+        message: "Failed to send a personalized send"
     },
     [CartaAlerts.Schedule_Nonpersonalized_Send]: {
         priority: Priority.P2,
-        message: "Unable to send a nonpersonalized send"
+        message: "Failed to send a nonpersonalized send"
     },
     [CartaAlerts.Alert_Send]: {
         priority: Priority.P1,
-        message: "Test alert, please ignore"
+        message: "Failed to send an alert send"
     },
     [CartaAlerts.No_Transactional_Sends_15_Minutes]: {
         priority: Priority.P2,
-        message: "Viewers don’t receive transactional emails in last 15 mins"
+        message: "Viewers don’t receive transactional emails in last 15 mins",
+        description: `
+        1. Check Transactional Campaign: ${
+            process.env.TRANSACTIONAL_CAMPAIGN_ID
+        }
+        2. Check nlSend records with filter ${JSON.stringify(
+            sendFilters["transactional"]
+        )}, sorted by statusDoneTimestamp.`
     },
     [CartaAlerts.No_Personalized_Sends_15_Minutes]: {
         priority: Priority.P2,
-        message: "Viewers don’t receive personalized emails in last 15 mins"
+        message: "Viewers don’t receive personalized emails in last 15 mins",
+        description: `
+        1. Check Nonpersonalized Campaign: ${
+            process.env.PERSONALIZED_CAMPAIGN_ID
+        }       
+        2. Check nlSend records with filter ${JSON.stringify(
+            sendFilters["personalized"]
+        )}, sorted by statusDoneTimestamp`
     },
     [CartaAlerts.No_NonpersonalizedSends_15_Minutes]: {
         priority: Priority.P2,
-        message: "Viewers don’t receive nonpersonalized emails in last 15 mins"
+        message: "Viewers don’t receive nonpersonalized emails in last 15 mins",
+        description: `
+        1. Check Nonpersonalized Campaign: ${
+            process.env.PERSONALIZED_CAMPAIGN_ID
+        }
+        2. Check nlSend records with filter ${JSON.stringify(
+            sendFilters["nonpersonalized"]
+        )}, sorted by statusDoneTimestamp`
     },
     [CartaAlerts.No_Alerts_15_Minutes]: {
         priority: Priority.P2,
-        message: "Viewers don’t receive alerts in last 15 mins"
+        message: "Viewers don’t receive alerts in last 15 mins",
+        description: `
+        1. Check Alert Campaign: ${process.env.ALERT_CAMPAIGN_NAME}
+        2. Check nlSend records with filter ${JSON.stringify(
+            sendFilters["alert"]
+        )}, sorted by statusDoneTimestamp`
     },
     [CartaAlerts.No_Transactional_Sends_30_Minutes]: {
         priority: Priority.P1,
-        message: "Viewers don’t receive transactional emails in last 30 mins"
+        message: "Viewers don’t receive transactional emails in last 30 mins",
+        description: `
+        1. Check Transactional Campaign: ${
+            process.env.TRANSACTIONAL_CAMPAIGN_ID
+        }
+        2. Check nlSend records with filter ${JSON.stringify(
+            sendFilters["transactional"]
+        )}, sorted by statusDoneTimestamp.`
     },
     [CartaAlerts.No_Personalized_Sends_30_Minutes]: {
         priority: Priority.P1,
-        message: "Viewers don’t receive personalized emails in last 30 mins"
+        message: "Viewers don’t receive personalized emails in last 30 mins",
+        description: `
+        1. Check Nonpersonalized Campaign: ${
+            process.env.PERSONALIZED_CAMPAIGN_ID
+        }       
+        2. Check nlSend records with filter ${JSON.stringify(
+            sendFilters["personalized"]
+        )}, sorted by statusDoneTimestamp`
     },
     [CartaAlerts.No_NonpersonalizedSends_30_Minutes]: {
         priority: Priority.P1,
-        message: "Viewers don’t receive nonpersonalized emails in last 30 mins"
+        message: "Viewers don’t receive nonpersonalized emails in last 30 mins",
+        description: `
+        1. Check Nonpersonalized Campaign: ${
+            process.env.NONPERSONALIZED_CAMPAIGN_ID
+        }
+        2. Check nlSend records with filter ${JSON.stringify(
+            sendFilters["nonpersonalized"]
+        )}, sorted by statusDoneTimestamp`
     },
     [CartaAlerts.No_Alerts_30_Minutes]: {
         priority: Priority.P1,
-        message: "Viewers don’t receive alerts in last 30 mins"
+        message: "Viewers don’t receive alerts in last 30 mins",
+        description: `
+        1. Check Alert Campaign: ${process.env.ALERT_CAMPAIGN_NAME}
+        2. Check nlSend records with filter ${JSON.stringify(
+            sendFilters["alert"]
+        )}, sorted by statusDoneTimestamp`
     },
     [CartaAlerts.Ses_UsEast1]: {
         priority: Priority.P0,
-        message: "Unable to send email to us-east-1"
+        message: "Failed to send email via SES us-east-1"
     },
     [CartaAlerts.Ses_UsWest2]: {
         priority: Priority.P0,
-        message: "Unable to send email to us-west-2"
+        message: "Failed to send email via SES us-west-2"
     },
     [CartaAlerts.Metrics_Processing_Above_Threshshold]: {
         priority: Priority.P2,
