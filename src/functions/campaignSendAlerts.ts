@@ -1,12 +1,8 @@
 import { Collection, ObjectId } from "mongodb";
 import { getMongoDatabase } from "../mongo";
 import { DateTime } from "luxon";
-import {
-    CartaAlerts,
-    closeOpenAlert,
-    createAlert,
-    escalateAlert
-} from "../opsGenieHelpers";
+import { closeOpenAlert, createAlert, escalateAlert } from "../opsGenieHelpers";
+import { CartaAlerts } from "../alerts";
 
 export type NewsletterSend = {
     _id: ObjectId;
@@ -198,5 +194,13 @@ export const campaignSendAlerts = async () => {
         escalateAlert(CartaAlerts.Multiple_Campaign_Send_Delay, "P0");
     }
 
-    await client.close();
+    // If the function is running in a local environment (as specified by the IS_LOCAL environment variable),
+    // we close the MongoDB client connection after the function execution is complete. This is done because
+    // in a local environment (like when running tests or invoking the function manually), Node.js process
+    // won't exit as long as there are open connections. However, in a production environment (e.g., on AWS Lambda),
+    // connections are managed differently, so we want to keep them open for possible reuse across multiple
+    // invocations of the function for performance reasons.
+    if (process.env.IS_LOCAL) {
+        await client.close();
+    }
 };

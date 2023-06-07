@@ -1,6 +1,7 @@
 import { GetParameterCommand, SSMClient } from "@aws-sdk/client-ssm";
-import { CartaAlerts, closeOpenAlert, createAlert } from "../opsGenieHelpers";
+import { closeOpenAlert, createAlert } from "../opsGenieHelpers";
 import fetch from "cross-fetch"; // Using node-fetch for compatibility with Node.js
+import { CartaAlerts } from "../alerts";
 
 export const testAlert = async () => {
     try {

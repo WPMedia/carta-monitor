@@ -2,10 +2,26 @@ import { Collection, Db, MongoClient } from "mongodb";
 import { getParametersFromSSM } from "./helpers";
 import { NewsletterSend } from "./functions/campaignSendAlerts";
 
+// In AWS Lambda, variables declared outside of the function handler, like cachedDb and cachedClient,
+// are cached between function invocations for the lifetime of the container instance of the function.
+// AWS reuses the function container for a period of time, before disposing it.
+// During this period, these variables will maintain their values, making them effective for caching
+// purposes like reusing a database connection. However, keep in mind that AWS can dispose of the function
+// container at any time. So, we shouldn't rely on them for critical data or state.
+// https://aws.amazon.com/blogs/compute/caching-data-and-configuration-settings-with-aws-lambda-extensions/
+
+let cachedDb: Db;
+let cachedClient: MongoClient;
+
 export const getMongoDatabase = async (): Promise<{
     db: Db;
     client: MongoClient;
 }> => {
+    if (cachedDb && cachedClient) {
+        console.log("Using cached database instance");
+        return Promise.resolve({ db: cachedDb, client: cachedClient });
+    }
+
     const mongoConnectionStringPassword = (
         await getParametersFromSSM(["mongodb.password"])
     )[0].value;
@@ -18,7 +34,9 @@ export const getMongoDatabase = async (): Promise<{
 
     try {
         await client.connect();
-        return { db: client.db(process.env.MONGODB_NAME), client };
+        cachedDb = client.db(process.env.MONGODB_NAME);
+        cachedClient = client;
+        return { db: cachedDb, client: cachedClient };
     } catch (error) {
         console.error(
             `An error occurred while connecting to MongoDB: ${error}`

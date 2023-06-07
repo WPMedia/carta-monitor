@@ -3,8 +3,9 @@ import { NewsletterSend } from "./campaignSendAlerts";
 import { Collection, Db, MongoClient, ObjectId } from "mongodb";
 import { getMongoDatabase, sendFilters } from "../mongo";
 import { MongoMemoryServer } from "mongodb-memory-server";
-import { CartaAlerts, closeOpenAlert, createAlert } from "../opsGenieHelpers";
+import { closeOpenAlert, createAlert } from "../opsGenieHelpers";
 import { send } from "./send";
+import { CartaAlerts } from "../alerts";
 
 jest.mock("../opsGenieHelpers", () => ({
     closeOpenAlert: jest.fn(),
@@ -24,7 +25,7 @@ let mongo: MongoMemoryServer;
 let db: Db;
 let client: MongoClient;
 
-beforeEach(async () => {
+beforeAll(async () => {
     mongo = await MongoMemoryServer.create();
     const uri = mongo.getUri();
     process.env.MONGODB_URI = uri;
@@ -37,6 +38,11 @@ beforeEach(async () => {
 
 afterEach(async () => {
     await db.collection("nlSend").deleteMany({});
+});
+
+afterAll(async () => {
+    const connection = await getMongoDatabase();
+    await connection.client.close();
     await client.close();
     await mongo.stop();
 });

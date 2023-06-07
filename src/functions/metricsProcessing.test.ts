@@ -1,4 +1,5 @@
-import { CartaAlerts, closeOpenAlert, createAlert } from "../opsGenieHelpers";
+import { CartaAlerts } from "../alerts";
+import { closeOpenAlert, createAlert } from "../opsGenieHelpers";
 import { checkMetricsProcessing } from "./metricsProcessing";
 
 process.env.MONGODB_URI = "mongodb://localhost:27017/{0}";

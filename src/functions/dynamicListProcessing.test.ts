@@ -5,8 +5,9 @@ import {
 } from "./dynamicListProcessing";
 import { MongoMemoryServer } from "mongodb-memory-server";
 import { getMongoDatabase } from "../mongo";
-import { CartaAlerts, createAlert } from "../opsGenieHelpers";
+import { createAlert } from "../opsGenieHelpers";
 import { Db, MongoClient } from "mongodb";
+import { CartaAlerts } from "../alerts";
 
 jest.mock("../opsGenieHelpers", () => ({
     createAlert: jest.fn()
@@ -26,14 +27,13 @@ let client: MongoClient;
 
 const testingDateTime = DateTime.local(2023, 5, 30, 0, 0, 0);
 
-beforeEach(async () => {
+beforeAll(async () => {
     mongo = await MongoMemoryServer.create();
     const uri = mongo.getUri();
     process.env.MONGODB_URI = uri;
     process.env.MONGODB_NAME = "test-db";
 
     const connection = await getMongoDatabase();
-
     db = connection.db;
     client = connection.client;
 
@@ -42,6 +42,11 @@ beforeEach(async () => {
 
 afterEach(async () => {
     await db.collection("nlSend").deleteMany({});
+});
+
+afterAll(async () => {
+    const connection = await getMongoDatabase();
+    await connection.client.close();
     await client.close();
     await mongo.stop();
 });
@@ -100,7 +105,6 @@ describe("checkDynamicListProcessing", () => {
     afterEach(async () => {
         const lmListsCollection = db.collection("lm_lists");
         await lmListsCollection.deleteMany({});
-        client.close();
     });
 
     it("does not create alerts when lists are processing", async () => {

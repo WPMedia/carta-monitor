@@ -1,6 +1,7 @@
-import { CartaAlerts, closeOpenAlert, createAlert } from "../opsGenieHelpers";
+import { closeOpenAlert, createAlert } from "../opsGenieHelpers";
 import { checkFileDownloadProcessing } from "./fileDownloadProcessing";
 import { getMongoDatabase } from "../mongo";
+import { CartaAlerts } from "../alerts";
 
 jest.mock("../opsGenieHelpers", () => ({
     closeOpenAlert: jest.fn(),
@@ -46,14 +47,9 @@ describe("checkFileDownloadProcessing", () => {
             toArray: mockToArray
         };
 
-        const mockClientClose = jest.fn();
-
         (getMongoDatabase as jest.Mock).mockResolvedValue({
             db: {
                 collection: jest.fn().mockReturnValue(mockCollection)
-            },
-            client: {
-                close: mockClientClose
             }
         });
 
@@ -71,7 +67,6 @@ describe("checkFileDownloadProcessing", () => {
             }
         });
         expect(mockToArray).toHaveBeenCalled();
-        expect(mockClientClose).toHaveBeenCalled();
     });
 
     test("calls closeAlert when no files are currently processing", async () => {
@@ -82,14 +77,9 @@ describe("checkFileDownloadProcessing", () => {
             toArray: mockToArray
         };
 
-        const mockClientClose = jest.fn();
-
         (getMongoDatabase as jest.Mock).mockResolvedValue({
             db: {
                 collection: jest.fn().mockReturnValue(mockCollection)
-            },
-            client: {
-                close: mockClientClose
             }
         });
 
@@ -106,6 +96,5 @@ describe("checkFileDownloadProcessing", () => {
             }
         });
         expect(mockToArray).toHaveBeenCalled();
-        expect(mockClientClose).toHaveBeenCalled();
     });
 });

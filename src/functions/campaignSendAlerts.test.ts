@@ -32,7 +32,7 @@ let client: MongoClient;
 const id1 = new ObjectId();
 const id2 = new ObjectId();
 
-beforeEach(async () => {
+beforeAll(async () => {
     mongo = await MongoMemoryServer.create();
     const uri = mongo.getUri();
     process.env.MONGODB_URI = uri;
@@ -45,6 +45,11 @@ beforeEach(async () => {
 
 afterEach(async () => {
     await db.collection("nlSend").deleteMany({});
+});
+
+afterAll(async () => {
+    const connection = await getMongoDatabase();
+    await connection.client.close();
     await client.close();
     await mongo.stop();
 });

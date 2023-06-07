@@ -1,8 +1,9 @@
 import * as dotenv from "dotenv";
 dotenv.config();
 import { DateTime } from "luxon";
-import { CartaAlerts, closeOpenAlert, createAlert } from "../opsGenieHelpers";
+import { closeOpenAlert, createAlert } from "../opsGenieHelpers";
 import { getCartaServer } from "../cartaServer";
+import { CartaAlerts } from "../alerts";
 
 const createAndSendLetter = async (
     letterType: "nonPersonalized" | "personalized" | "transactional",
@@ -42,7 +43,9 @@ export const sendScheduling = async () => {
         await closeOpenAlert(CartaAlerts.Schedule_Nonpersonalized_Send);
     } catch (error) {
         console.error(
-            `Failed to schedule send of nonPersonalized letter ${error}`
+            `Failed to schedule send of nonPersonalized letter ${JSON.stringify(
+                error
+            )}`
         );
         await createAlert(CartaAlerts.Schedule_Nonpersonalized_Send);
         throw error;
@@ -57,7 +60,9 @@ export const sendScheduling = async () => {
         await closeOpenAlert(CartaAlerts.Schedule_Personalized_Send);
     } catch (error) {
         console.error(
-            `Failed to schedule send of personalized letter ${error}`
+            `Failed to schedule send of personalized letter ${JSON.stringify(
+                error
+            )}`
         );
         await createAlert(CartaAlerts.Schedule_Personalized_Send);
         throw error;
@@ -71,7 +76,9 @@ export const sendScheduling = async () => {
         );
         await closeOpenAlert(CartaAlerts.Schedule_Transactional_Send);
     } catch (error) {
-        console.error(`Failed to schedule send of nonPers letter ${error}`);
+        console.error(
+            `Failed to schedule send of nonPers letter ${JSON.stringify(error)}`
+        );
         await createAlert(CartaAlerts.Schedule_Transactional_Send);
         throw error;
     }

@@ -1,19 +1,24 @@
 import { Collection, Filter } from "mongodb";
 import { getMongoDatabase } from "../mongo";
-import { CartaAlerts, createAlert } from "../opsGenieHelpers";
+import { createAlert } from "../opsGenieHelpers";
 import { DateTime } from "luxon";
+import { CartaAlerts } from "../alerts";
+
+type List = {
+    name: string;
+};
 
 /**
 Generates alerts for tardy lists based on the provided filter and alert type.
-@param {Collection<any>} lmListsCollection - The collection of lists to query.
+@param {Collection<List>} lmListsCollection - The collection of lists to query.
 @param {Filter<Document>} filter - The filter to apply when querying the lists collection.
 @param {CartaAlerts} alertType - The type of alert to be generated.
 @param {string} messagePrefix - The prefix to be included in the alert message.
 @returns - A Promise that resolves when the handling is complete.
 */
 const generateAlertsForTardyLists = async (
-    lmListsCollection: Collection<any>,
-    filter: Filter<Document>,
+    lmListsCollection: Collection<List>,
+    filter: Filter<{ name: string }>,
     alertType: CartaAlerts,
     messagePrefix: string
 ) => {
@@ -98,7 +103,7 @@ export const checkDynamicListProcessing = async () => {
     const { endWindowIso, startWindowIso, endWindowHHmm, startWindowHHmm } =
         calculateQueryWindows(DateTime.local());
 
-    const lmListsCollection = db.collection("lm_lists");
+    const lmListsCollection: Collection<List> = db.collection("lm_lists");
 
     const commonFilter = {
         type: "DYNAMIC",
@@ -136,5 +141,13 @@ export const checkDynamicListProcessing = async () => {
         "Scheduled dynamic list(s) failed to run"
     );
 
-    await client.close();
+    // If the function is running in a local environment (as specified by the IS_LOCAL environment variable),
+    // we close the MongoDB client connection after the function execution is complete. This is done because
+    // in a local environment (like when running tests or invoking the function manually), Node.js process
+    // won't exit as long as there are open connections. However, in a production environment (e.g., on AWS Lambda),
+    // connections are managed differently, so we want to keep them open for possible reuse across multiple
+    // invocations of the function for performance reasons.
+    if (process.env.IS_LOCAL) {
+        await client.close();
+    }
 };

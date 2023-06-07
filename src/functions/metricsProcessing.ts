@@ -1,5 +1,6 @@
+import { CartaAlerts } from "../alerts";
 import { getMongoDatabase } from "../mongo";
-import { CartaAlerts, closeOpenAlert, createAlert } from "../opsGenieHelpers";
+import { closeOpenAlert, createAlert } from "../opsGenieHelpers";
 
 // Our events collection reaches a peak size of approximately 13 million when the Post Most and our massive marketing
 // send (with 2.7 million recipients) are dispatched around the same time.
@@ -18,16 +19,26 @@ export const checkMetricsProcessing = async () => {
         const eventsCount = await eventsCollection.estimatedDocumentCount();
 
         if (eventsCount < eventsCountAlertThreshold) {
-            closeOpenAlert(CartaAlerts.Metrics_Processing_Above_Threshshold);
+            await closeOpenAlert(
+                CartaAlerts.Metrics_Processing_Above_Threshshold
+            );
         } else {
             console.log(
                 "above the events collection count threshold; opening alert"
             );
-            createAlert(CartaAlerts.Metrics_Processing_Above_Threshshold);
+            await createAlert(CartaAlerts.Metrics_Processing_Above_Threshshold);
         }
     } catch (error) {
         console.error(`An error occurred while processing metrics: ${error}`);
-    } finally {
+    }
+
+    // If the function is running in a local environment (as specified by the IS_LOCAL environment variable),
+    // we close the MongoDB client connection after the function execution is complete. This is done because
+    // in a local environment (like when running tests or invoking the function manually), Node.js process
+    // won't exit as long as there are open connections. However, in a production environment (e.g., on AWS Lambda),
+    // connections are managed differently, so we want to keep them open for possible reuse across multiple
+    // invocations of the function for performance reasons.
+    if (process.env.IS_LOCAL) {
         await client.close();
     }
 
