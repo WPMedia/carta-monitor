@@ -25,9 +25,9 @@ functions:
             STAGE: ${opt:stage, "local"}
         events:
             - schedule: rate(10 minutes)
-    ses:
-        handler: src/functions/ses.ses
-        description: Healthcheck to ensure our SES Client works
+    sender:
+        handler: src/functions/sender.sender
+        description: Healthcheck to ensure carta-sender can be successfully invoked
         environment:
             STAGE: ${opt:stage, "local"}
         events:

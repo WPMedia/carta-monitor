@@ -3,7 +3,7 @@
 ## Offline Testing
 
 -   `serverless invoke local --function sendScheduling`
--   `serverless invoke local --function ses`
+-   `serverless invoke local --function sender`
 -   `serverless invoke local --function testAlert`
 -   `serverless invoke local --function metricsProcessing`
 -   `serverless invoke local --function fileDownloadProcessing`

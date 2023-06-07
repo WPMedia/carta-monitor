@@ -37,13 +37,10 @@ const triggerAlert = async (
     const utcNow = now.setZone("utc"); // convert to UTC to compare to UTC entry in mongo
     const fifteenMinutesAgo = utcNow.minus({ minutes: 15 });
     const thirtyMinutesAgo = utcNow.minus({ minutes: 30 });
-
     if (sendTime > fifteenMinutesAgo) {
         await closeOpenAlert(alerts[alert].thirtyAlert);
         await closeOpenAlert(alerts[alert].fifteenAlert);
-        return;
-    }
-    if (sendTime <= thirtyMinutesAgo) {
+    } else if (sendTime <= thirtyMinutesAgo) {
         console.log(
             `Latest "${alert}" with id ${
                 mostRecentSend._id
@@ -52,9 +49,7 @@ const triggerAlert = async (
             )}, creating 30 minutes alert`
         );
         await createAlert(alerts[alert].thirtyAlert);
-        return;
-    }
-    if (sendTime <= fifteenMinutesAgo) {
+    } else if (sendTime <= fifteenMinutesAgo) {
         console.log(
             `Latest "${alert}" with id ${
                 mostRecentSend._id

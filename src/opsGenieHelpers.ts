@@ -221,7 +221,9 @@ export async function createAlert(
         "https://api.opsgenie.com/v2/alerts",
         "POST",
         {
-            message,
+            message: `[${
+                process.env.OPS_GENIE_ENV?.toLocaleUpperCase() ?? "Undefined"
+            }] ${message}`,
             alias,
             description:
                 description ?? customDescription ?? "No description provided",
