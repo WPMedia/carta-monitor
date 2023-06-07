@@ -8,7 +8,7 @@
 # Declare an array with the names of the services to invoke
 declare -a services=(
     "sendScheduling"
-    # "sender" will add back when todo is done on this function
+    "sender"
     "testAlert"
     "metricsProcessing"
     "fileDownloadProcessing"

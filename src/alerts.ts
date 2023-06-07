@@ -64,7 +64,10 @@ export const enum CartaAlerts {
     // Campaign send alerts
     // These alerts monitor the status of newsletter campaigns and update their send state.
     // They also trigger alerts and escalate the alert level based on the campaign status.
-    Multiple_Campaign_Send_Delay = "Multiple_Campaign_Send_Delay" // Email send of multiple campaigns is delayed.
+    Multiple_Campaign_Send_Delay = "Multiple_Campaign_Send_Delay", // Email send of multiple campaigns is delayed.
+
+    // Carta-sender
+    Carta_Sender = "Carta_Sender" // Email sends failing in carta-sender
 }
 
 interface AlertDetails {
@@ -183,5 +186,9 @@ export const alertDetails: { [K in CartaAlerts]: AlertDetails } = {
     [CartaAlerts.Multiple_Campaign_Send_Delay]: {
         priority: Priority.P1,
         message: "Email send of multiple campaigns is delayed."
+    },
+    [CartaAlerts.Carta_Sender]: {
+        priority: Priority.P1,
+        message: "Carta-sender returning failed response"
     }
 };

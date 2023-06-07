@@ -1,6 +1,7 @@
-import { Lambda } from "@aws-sdk/client-lambda";
-
-const lambdaClient = new Lambda({ region: "us-east-1" });
+import { closeOpenAlert, createAlert } from "../opsGenieHelpers";
+import { CartaAlerts } from "../alerts";
+import { getParametersFromSSM } from "../helpers";
+import fetch from "cross-fetch";
 
 const sendEvent = {
     subject:
@@ -9,7 +10,7 @@ const sendEvent = {
     textBody: '[[ "example" | capitalize ]]',
     to: [
         {
-            email: "jack.nugent@washpost.com"
+            email: "carta-test@washpost.com"
         }
     ],
     body: Buffer.from(
@@ -17,20 +18,51 @@ const sendEvent = {
     ).toString("base64")
 };
 
+type SendResult =
+    | {
+          totalFailedSends: number;
+          totalSuccessfulSends: number;
+      }
+    | { error: Error };
+
+const sendEmail = async () => {
+    const cartaSenderKey = (
+        await getParametersFromSSM(["carta.sender.endpoint.access.key"])
+    )[0].value;
+
+    const response = await fetch(process.env.NONPERSONALIZED_SENDER_URL, {
+        method: "POST",
+        headers: {
+            "x-api-key": cartaSenderKey,
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify(sendEvent)
+    });
+
+    return (await response.json()) as SendResult;
+};
+
 export const sender = async () => {
-    // TODO -- replace ARN with in-progress private endpoint from CAR-6227
-    const params = {
-        FunctionName: process.env.NONPERSONALIZED_SENDER_LAMBDA_ARN,
-        InvocationType: "RequestResponse",
-        Payload: new TextEncoder().encode(JSON.stringify(sendEvent))
-    };
+    let sendError: string;
+    let result: SendResult;
 
     try {
-        const response = await lambdaClient.invoke(params);
-        console.log("Lambda invocation response:", response);
-        return response;
-    } catch (error) {
-        console.error("Failed to invoke Lambda function:", error);
-        throw error;
+        result = await sendEmail();
+    } catch (error: any) {
+        sendError = JSON.stringify(error);
     }
+
+    if ("error" in result || result.totalFailedSends > 0) {
+        sendError = JSON.stringify(result);
+    }
+
+    if (sendError) {
+        createAlert(
+            CartaAlerts.Carta_Sender,
+            `Failed to send to carta-sender: ${sendError}`
+        );
+        return;
+    }
+
+    closeOpenAlert(CartaAlerts.Carta_Sender);
 };
