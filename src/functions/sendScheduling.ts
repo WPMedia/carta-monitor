@@ -4,11 +4,9 @@ import { DateTime } from "luxon";
 import { closeOpenAlert, createAlert } from "../opsGenieHelpers";
 import { getCartaServer } from "../cartaServer";
 import { CartaAlerts } from "../alerts";
+import { Send } from "../mongo";
 
-const createAndSendLetter = async (
-    letterType: "nonPersonalized" | "personalized" | "transactional",
-    campaignId: string
-) => {
+const createAndSendLetter = async (letterType: Send, campaignId: string) => {
     const formattedDate = DateTime.fromJSDate(new Date()).toFormat(
         "yyyy-MM-dd HH:mm:ss"
     );
@@ -19,6 +17,9 @@ const createAndSendLetter = async (
 
     const letterId = (await server.Letters.createLetter(letterName, campaignId))
         .updatedDocId as string;
+
+    if (!letterId) throw new Error(`Failed to create letter for ${campaignId}`);
+
     console.log(`Created letter ${letterId} on campaign ${campaignId}`);
 
     const successfulScheduleSend =
@@ -30,57 +31,49 @@ const createAndSendLetter = async (
 
     if (!successfulScheduleSend)
         throw new Error("Send letter endpoint returned a failure");
+
     console.log(`Scheduled send for ${letterType} letter ${letterId}`);
 };
 
+const sends: {
+    letterType: Send;
+    alertType: CartaAlerts;
+    campaignId: string;
+}[] = [
+    {
+        letterType: "nonpersonalized",
+        alertType: CartaAlerts.Schedule_Nonpersonalized_Send,
+        campaignId: process.env.NONPERSONALIZED_CAMPAIGN_ID
+    },
+    {
+        letterType: "personalized",
+        alertType: CartaAlerts.Schedule_Personalized_Send,
+        campaignId: process.env.PERSONALIZED_CAMPAIGN_ID
+    },
+    {
+        letterType: "transactional",
+        alertType: CartaAlerts.Schedule_Transactional_Send,
+        campaignId: process.env.TRANSACTIONAL_CAMPAIGN_ID
+    }
+];
+
 export const sendScheduling = async () => {
-    // Nonpersonalized send
-    try {
-        await createAndSendLetter(
-            "nonPersonalized",
-            process.env.NONPERSONALIZED_CAMPAIGN_ID as string
-        );
-        await closeOpenAlert(CartaAlerts.Schedule_Nonpersonalized_Send);
-    } catch (error) {
-        console.error(
-            `Failed to schedule send of nonPersonalized letter ${JSON.stringify(
-                error
-            )}`
-        );
-        await createAlert(CartaAlerts.Schedule_Nonpersonalized_Send);
-        throw error;
-    }
+    for (const send of sends) {
+        if (!send.campaignId) {
+            throw new Error(
+                `Missing ${send.letterType.toUpperCase()}_CAMPAIGN_ID in .env file`
+            );
+        }
 
-    // Personalized send
-    try {
-        await createAndSendLetter(
-            "personalized",
-            process.env.PERSONALIZED_CAMPAIGN_ID as string
-        );
-        await closeOpenAlert(CartaAlerts.Schedule_Personalized_Send);
-    } catch (error) {
-        console.error(
-            `Failed to schedule send of personalized letter ${JSON.stringify(
-                error
-            )}`
-        );
-        await createAlert(CartaAlerts.Schedule_Personalized_Send);
-        throw error;
-    }
-
-    // Transactional send
-    try {
-        await createAndSendLetter(
-            "transactional",
-            process.env.TRANSACTIONAL_CAMPAIGN_ID as string
-        );
-        await closeOpenAlert(CartaAlerts.Schedule_Transactional_Send);
-    } catch (error) {
-        console.error(
-            `Failed to schedule send of nonPers letter ${JSON.stringify(error)}`
-        );
-        await createAlert(CartaAlerts.Schedule_Transactional_Send);
-        throw error;
+        try {
+            await createAndSendLetter(send.letterType, send.campaignId);
+            await closeOpenAlert(send.alertType);
+        } catch (error) {
+            console.error(
+                `Failed to schedule send of ${send.letterType} letter. Error: ${error.message}`
+            );
+            await createAlert(send.alertType);
+        }
     }
 
     return {
