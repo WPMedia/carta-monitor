@@ -1,21 +1,5 @@
-// Declare the variables at the global scope of the module.
-// These variables will persist across multiple invocations of the Lambda function,
-
+import { getEnvCache } from "./helpers";
 import { sendFilters } from "./mongo";
-
-// as long as the same container is used.
-let transactionalCampaignId: string;
-let personalizedCampaignId: string;
-let nonPersonalizedCampaignId: string;
-let alertCampaignName: string;
-// As soon as this module is loaded, this self-invoking function is run.
-// It caches the environment variables.
-(function cacheEnvironmentVariables() {
-    transactionalCampaignId = process.env.TRANSACTIONAL_CAMPAIGN_ID;
-    personalizedCampaignId = process.env.PERSONALIZED_CAMPAIGN_ID;
-    nonPersonalizedCampaignId = process.env.NONPERSONALIZED_CAMPAIGN_ID;
-    alertCampaignName = process.env.ALERT_CAMPAIGN_NAME;
-})();
 
 export enum Priority {
     P0 = "P0",
@@ -97,7 +81,9 @@ export const alertDetails: { [K in CartaAlerts]: AlertDetails } = {
         priority: Priority.P2,
         message: "Viewers don’t receive transactional emails in last 15 mins",
         description: `
-        1. Check Transactional Campaign: ${transactionalCampaignId}
+        1. Check Transactional Campaign: ${
+            getEnvCache().TRANSACTIONAL_CAMPAIGN_ID
+        }
         2. Check nlSend records with filter ${JSON.stringify(
             sendFilters["transactional"]
         )}, sorted by statusDoneTimestamp.`
@@ -106,7 +92,9 @@ export const alertDetails: { [K in CartaAlerts]: AlertDetails } = {
         priority: Priority.P2,
         message: "Viewers don’t receive personalized emails in last 15 mins",
         description: `
-        1. Check Nonpersonalized Campaign: ${personalizedCampaignId}       
+        1. Check Personalized Campaign: ${
+            getEnvCache().PERSONALIZED_CAMPAIGN_ID
+        }       
         2. Check nlSend records with filter ${JSON.stringify(
             sendFilters["personalized"]
         )}, sorted by statusDoneTimestamp`
@@ -115,7 +103,9 @@ export const alertDetails: { [K in CartaAlerts]: AlertDetails } = {
         priority: Priority.P2,
         message: "Viewers don’t receive nonpersonalized emails in last 15 mins",
         description: `
-        1. Check Nonpersonalized Campaign: ${nonPersonalizedCampaignId}
+        1. Check Nonpersonalized Campaign: ${
+            getEnvCache().NONPERSONALIZED_CAMPAIGN_ID
+        }
         2. Check nlSend records with filter ${JSON.stringify(
             sendFilters["nonpersonalized"]
         )}, sorted by statusDoneTimestamp`
@@ -124,7 +114,7 @@ export const alertDetails: { [K in CartaAlerts]: AlertDetails } = {
         priority: Priority.P2,
         message: "Viewers don’t receive alerts in last 15 mins",
         description: `
-        1. Check Alert Campaign: ${alertCampaignName}
+        1. Check Alert Campaign: ${getEnvCache().ALERT_CAMPAIGN_NAME}
         2. Check nlSend records with filter ${JSON.stringify(
             sendFilters["alert"]
         )}, sorted by statusDoneTimestamp`
@@ -133,7 +123,9 @@ export const alertDetails: { [K in CartaAlerts]: AlertDetails } = {
         priority: Priority.P1,
         message: "Viewers don’t receive transactional emails in last 30 mins",
         description: `
-        1. Check Transactional Campaign: ${transactionalCampaignId}
+        1. Check Transactional Campaign: ${
+            getEnvCache().TRANSACTIONAL_CAMPAIGN_ID
+        }
         2. Check nlSend records with filter ${JSON.stringify(
             sendFilters["transactional"]
         )}, sorted by statusDoneTimestamp.`
@@ -142,7 +134,9 @@ export const alertDetails: { [K in CartaAlerts]: AlertDetails } = {
         priority: Priority.P1,
         message: "Viewers don’t receive personalized emails in last 30 mins",
         description: `
-        1. Check Nonpersonalized Campaign: ${personalizedCampaignId}       
+        1. Check Nonpersonalized Campaign: ${
+            getEnvCache().PERSONALIZED_CAMPAIGN_ID
+        }       
         2. Check nlSend records with filter ${JSON.stringify(
             sendFilters["personalized"]
         )}, sorted by statusDoneTimestamp`
@@ -151,7 +145,9 @@ export const alertDetails: { [K in CartaAlerts]: AlertDetails } = {
         priority: Priority.P1,
         message: "Viewers don’t receive nonpersonalized emails in last 30 mins",
         description: `
-        1. Check Nonpersonalized Campaign: ${nonPersonalizedCampaignId}
+        1. Check Nonpersonalized Campaign: ${
+            getEnvCache().NONPERSONALIZED_CAMPAIGN_ID
+        }
         2. Check nlSend records with filter ${JSON.stringify(
             sendFilters["nonpersonalized"]
         )}, sorted by statusDoneTimestamp`
@@ -160,7 +156,7 @@ export const alertDetails: { [K in CartaAlerts]: AlertDetails } = {
         priority: Priority.P1,
         message: "Viewers don’t receive alerts in last 30 mins",
         description: `
-        1. Check Alert Campaign: ${alertCampaignName}
+        1. Check Alert Campaign: ${getEnvCache().ALERT_CAMPAIGN_NAME}
         2. Check nlSend records with filter ${JSON.stringify(
             sendFilters["alert"]
         )}, sorted by statusDoneTimestamp`

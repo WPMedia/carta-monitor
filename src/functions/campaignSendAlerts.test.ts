@@ -10,6 +10,7 @@ import { Collection, Db, MongoClient, ObjectId } from "mongodb";
 import { getMongoDatabase } from "../mongo";
 import { MongoMemoryServer } from "mongodb-memory-server";
 import { closeOpenAlert, createAlert, escalateAlert } from "../opsGenieHelpers";
+import { getEnvCache } from "../helpers";
 
 jest.mock("../opsGenieHelpers", () => ({
     closeOpenAlert: jest.fn(),
@@ -22,7 +23,8 @@ jest.mock("../helpers", () => ({
         {
             "mongodb.password": "testpassword"
         }
-    ])
+    ]),
+    getEnvCache: jest.fn()
 }));
 
 let mongo: MongoMemoryServer;
@@ -35,8 +37,11 @@ const id2 = new ObjectId();
 beforeAll(async () => {
     mongo = await MongoMemoryServer.create();
     const uri = mongo.getUri();
-    process.env.MONGODB_URI = uri;
-    process.env.MONGODB_NAME = "test-db";
+
+    (getEnvCache as jest.Mock).mockImplementation(() => ({
+        MONGODB_URI: uri,
+        MONGODB_NAME: "test-db"
+    }));
 
     const connection = await getMongoDatabase();
     db = connection.db;

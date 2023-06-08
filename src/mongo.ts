@@ -1,5 +1,5 @@
 import { Collection, Db, MongoClient } from "mongodb";
-import { getParametersFromSSM } from "./helpers";
+import { getEnvCache, getParametersFromSSM } from "./helpers";
 import { NewsletterSend } from "./functions/campaignSendAlerts";
 
 // In AWS Lambda, variables declared outside of the function handler, like cachedDb and cachedClient,
@@ -25,7 +25,7 @@ export const getMongoDatabase = async (): Promise<{
     const mongoConnectionStringPassword = (
         await getParametersFromSSM(["mongodb.password"])
     )[0].value;
-    const mongoUri = process.env.MONGODB_URI.replace(
+    const mongoUri = getEnvCache().MONGODB_URI.replace(
         "{0}",
         mongoConnectionStringPassword
     );
@@ -34,7 +34,7 @@ export const getMongoDatabase = async (): Promise<{
 
     try {
         await client.connect();
-        cachedDb = client.db(process.env.MONGODB_NAME);
+        cachedDb = client.db(getEnvCache().MONGODB_NAME);
         cachedClient = client;
         return { db: cachedDb, client: cachedClient };
     } catch (error) {

@@ -25,6 +25,12 @@ jest.mock("../mongo", () => ({
     })
 }));
 
+jest.mock("../helpers", () => ({
+    getEnvCache: jest
+        .fn()
+        .mockReturnValue({ NONPERSONALIZED_CAMPAIGN_ID: "campaignId" })
+}));
+
 describe("checkFileDownloadProcessing", () => {
     beforeEach(() => {
         jest.clearAllMocks();

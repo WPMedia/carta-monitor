@@ -5,6 +5,7 @@ import { closeOpenAlert, createAlert } from "../opsGenieHelpers";
 import { getCartaServer } from "../cartaServer";
 import { CartaAlerts } from "../alerts";
 import { Send } from "../mongo";
+import { getEnvCache } from "../helpers";
 
 const createAndSendLetter = async (letterType: Send, campaignId: string) => {
     const formattedDate = DateTime.fromJSDate(new Date()).toFormat(
@@ -35,29 +36,28 @@ const createAndSendLetter = async (letterType: Send, campaignId: string) => {
     console.log(`Scheduled send for ${letterType} letter ${letterId}`);
 };
 
-const sends: {
-    letterType: Send;
-    alertType: CartaAlerts;
-    campaignId: string;
-}[] = [
-    {
-        letterType: "nonpersonalized",
-        alertType: CartaAlerts.Schedule_Nonpersonalized_Send,
-        campaignId: process.env.NONPERSONALIZED_CAMPAIGN_ID
-    },
-    {
-        letterType: "personalized",
-        alertType: CartaAlerts.Schedule_Personalized_Send,
-        campaignId: process.env.PERSONALIZED_CAMPAIGN_ID
-    },
-    {
-        letterType: "transactional",
-        alertType: CartaAlerts.Schedule_Transactional_Send,
-        campaignId: process.env.TRANSACTIONAL_CAMPAIGN_ID
-    }
-];
-
 export const sendScheduling = async () => {
+    const sends: {
+        letterType: Send;
+        alertType: CartaAlerts;
+        campaignId: string;
+    }[] = [
+        {
+            letterType: "nonpersonalized",
+            alertType: CartaAlerts.Schedule_Nonpersonalized_Send,
+            campaignId: getEnvCache().NONPERSONALIZED_CAMPAIGN_ID
+        },
+        {
+            letterType: "personalized",
+            alertType: CartaAlerts.Schedule_Personalized_Send,
+            campaignId: getEnvCache().PERSONALIZED_CAMPAIGN_ID
+        },
+        {
+            letterType: "transactional",
+            alertType: CartaAlerts.Schedule_Transactional_Send,
+            campaignId: getEnvCache().TRANSACTIONAL_CAMPAIGN_ID
+        }
+    ];
     for (const send of sends) {
         if (!send.campaignId) {
             throw new Error(

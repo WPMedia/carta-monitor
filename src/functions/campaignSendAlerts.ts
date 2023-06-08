@@ -3,6 +3,7 @@ import { getMongoDatabase } from "../mongo";
 import { DateTime } from "luxon";
 import { closeOpenAlert, createAlert, escalateAlert } from "../opsGenieHelpers";
 import { CartaAlerts } from "../alerts";
+import { getEnvCache } from "../helpers";
 
 export type NewsletterSend = {
     _id: ObjectId;
@@ -183,7 +184,7 @@ export const campaignSendAlerts = async () => {
         createAlert(
             CartaAlerts.Multiple_Campaign_Send_Delay,
             `<p><a href="${
-                process.env.CARTA_UI_BASE_URL
+                getEnvCache().CARTA_UI_BASE_URL
             }status">View</a> campaign send statuses on Carta</p>. Incomplete nlSend ids: "${warningCampaignLetterIds.join(
                 ", "
             )}"`
@@ -200,7 +201,7 @@ export const campaignSendAlerts = async () => {
     // won't exit as long as there are open connections. However, in a production environment (e.g., on AWS Lambda),
     // connections are managed differently, so we want to keep them open for possible reuse across multiple
     // invocations of the function for performance reasons.
-    if (process.env.IS_LOCAL) {
+    if (getEnvCache().IS_LOCAL) {
         await client.close();
     }
 };

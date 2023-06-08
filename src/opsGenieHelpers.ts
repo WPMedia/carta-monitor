@@ -1,34 +1,6 @@
 import fetch from "cross-fetch"; // Using node-fetch for compatibility with Node.js
-import { getParametersFromSSM } from "./helpers";
+import { getEnvCache, getParametersFromSSM } from "./helpers";
 import { CartaAlerts, Priority, alertDetails } from "./alerts";
-
-// Declare a variable at the global scope of the module.
-// This variable will persist across multiple invocations of the Lambda function,
-// as long as the same container is used.
-// https://aws.amazon.com/blogs/compute/caching-data-and-configuration-settings-with-aws-lambda-extensions/
-let opsGenieKey: string;
-let opsGenieEnv: string;
-let isLocal: boolean;
-
-// As soon as this module is loaded, this self-invoking async function is run.
-// It fetches the ops.genie.api.key SSM parameter and stores it in the 'opsGenieKey' variable.
-// This is done outside of the handler function to cache the fetched parameter.
-// Because the variable is cached at the container level,
-// it doesn't need to be fetched every time the Lambda function is invoked.
-// Instead, it's fetched only when the container starts.
-(async () => {
-    try {
-        opsGenieKey = (await getParametersFromSSM(["ops.genie.api.key"]))[0]
-            .value;
-    } catch (error) {
-        // Log the error and exit the process with a non-zero status code.
-        console.error(`Failed to fetch the parameter from SSM: ${error}`);
-        process.exit(1);
-    }
-
-    opsGenieEnv = process.env.OPS_GENIE_ENV;
-    isLocal = JSON.parse(process.env.IS_LOCAL);
-})();
 
 type HttpMethod = "GET" | "POST" | "PUT" | "DELETE" | "PATCH" | "OPTIONS";
 
@@ -42,6 +14,9 @@ async function makeOpsGenieRequest(
     requestId: string;
     data?: { count: number };
 }> {
+    const opsGenieKey = (await getParametersFromSSM(["ops.genie.api.key"]))[0]
+        .value;
+
     const response = await fetch(`https://api.opsgenie.com/v2/alerts/${path}`, {
         method: method,
         headers: {
@@ -67,7 +42,7 @@ export async function createAlert(
     alias: keyof typeof CartaAlerts,
     customDescription?: string
 ) {
-    if (isLocal) {
+    if (getEnvCache().IS_LOCAL) {
         console.log(
             `Alert on local: ${JSON.stringify({ alias, customDescription })}`
         );
@@ -77,7 +52,7 @@ export async function createAlert(
     const { message, priority, description } = alertDetails[alias];
     const json = await makeOpsGenieRequest("", "POST", {
         message: `[${
-            opsGenieEnv?.toLocaleUpperCase() ?? "Undefined"
+            getEnvCache().OPS_GENIE_ENV.toLocaleUpperCase() ?? "Undefined"
         }] ${message}`,
         alias,
         description:

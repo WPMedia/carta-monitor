@@ -1,6 +1,6 @@
 import { closeOpenAlert, createAlert } from "../opsGenieHelpers";
 import { CartaAlerts } from "../alerts";
-import { getParametersFromSSM } from "../helpers";
+import { getEnvCache, getParametersFromSSM } from "../helpers";
 import fetch from "cross-fetch";
 
 const sendEvent = {
@@ -30,7 +30,7 @@ const sendEmail = async () => {
         await getParametersFromSSM(["carta.sender.endpoint.access.key"])
     )[0].value;
 
-    const response = await fetch(process.env.NONPERSONALIZED_SENDER_URL, {
+    const response = await fetch(getEnvCache().NONPERSONALIZED_SENDER_URL, {
         method: "POST",
         headers: {
             "x-api-key": cartaSenderKey,

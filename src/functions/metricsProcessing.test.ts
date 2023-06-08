@@ -1,12 +1,13 @@
 import { CartaAlerts } from "../alerts";
+import { getEnvCache } from "../helpers";
 import { closeOpenAlert, createAlert } from "../opsGenieHelpers";
 import { checkMetricsProcessing } from "./metricsProcessing";
 
-process.env.MONGODB_URI = "mongodb://localhost:27017/{0}";
-process.env.MONGODB_NAME = "testDB";
-
 jest.mock("../helpers", () => ({
-    getParametersFromSSM: jest.fn().mockReturnValue([{ value: "mockPassword" }])
+    getParametersFromSSM: jest
+        .fn()
+        .mockReturnValue([{ value: "mockPassword" }]),
+    getEnvCache: jest.fn()
 }));
 
 jest.mock("../opsGenieHelpers", () => ({
@@ -38,6 +39,13 @@ jest.mock("mongodb", () => {
             };
         })
     };
+});
+
+beforeAll(() => {
+    (getEnvCache as jest.Mock).mockImplementation(() => ({
+        MONGODB_URI: "mongodb://localhost:27017/{0}",
+        MONGODB_NAME: "test-db"
+    }));
 });
 
 describe("checkMetricsProcessing", () => {
