@@ -23,7 +23,7 @@ export const getMongoDatabase = async (): Promise<{
         return Promise.resolve({ db: cachedDb, client: cachedClient });
     }
 
-    const mongoConnectionStringPassword = await getSsmCache()[
+    const mongoConnectionStringPassword = (await getSsmCache())[
         "mongodb.password"
     ];
 
