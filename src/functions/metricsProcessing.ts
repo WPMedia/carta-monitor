@@ -1,7 +1,7 @@
 import { CartaAlerts } from "../alerts";
-import { getEnvCache } from "../helpers";
+import { getEnvCache } from "../environmentVariables";
 import { getMongoDatabase } from "../mongo";
-import { closeOpenAlert, createAlert } from "../opsGenieHelpers";
+import { closeOpenAlert, createAlert } from "../opsGenie";
 
 // Our events collection reaches a peak size of approximately 13 million when the Post Most and our massive marketing
 // send (with 2.7 million recipients) are dispatched around the same time.

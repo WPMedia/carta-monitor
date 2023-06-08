@@ -1,6 +1,7 @@
 import fetch from "cross-fetch"; // Using node-fetch for compatibility with Node.js
-import { getEnvCache, getParametersFromSSM } from "./helpers";
 import { CartaAlerts, Priority, alertDetails } from "./alerts";
+import { getEnvCache } from "./environmentVariables";
+import { getSsmCache } from "./ssm";
 
 type HttpMethod = "GET" | "POST" | "PUT" | "DELETE" | "PATCH" | "OPTIONS";
 
@@ -14,8 +15,7 @@ async function makeOpsGenieRequest(
     requestId: string;
     data?: { count: number };
 }> {
-    const opsGenieKey = (await getParametersFromSSM(["ops.genie.api.key"]))[0]
-        .value;
+    const opsGenieKey = (await getSsmCache())["ops.genie.api.key"];
 
     const response = await fetch(`https://api.opsgenie.com/v2/alerts/${path}`, {
         method: method,

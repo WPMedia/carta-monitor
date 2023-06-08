@@ -3,24 +3,27 @@ import { NewsletterSend } from "./campaignSendAlerts";
 import { Collection, Db, MongoClient, ObjectId } from "mongodb";
 import { getMongoDatabase, sendFilters } from "../mongo";
 import { MongoMemoryServer } from "mongodb-memory-server";
-import { closeOpenAlert, createAlert } from "../opsGenieHelpers";
+import { closeOpenAlert, createAlert } from "../opsGenie";
 import { send } from "./send";
 import { CartaAlerts } from "../alerts";
-import { getEnvCache } from "../helpers";
+import { getEnvCache } from "../environmentVariables";
 
-jest.mock("../opsGenieHelpers", () => ({
+jest.mock("../opsGenie", () => ({
     closeOpenAlert: jest.fn(),
     createAlert: jest.fn(),
     escalateAlert: jest.fn()
 }));
 
-jest.mock("../helpers", () => ({
-    getParametersFromSSM: jest.fn().mockReturnValue([
+jest.mock("../environmentVariables", () => ({
+    getEnvCache: jest.fn()
+}));
+
+jest.mock("../ssm", () => ({
+    getSsmCache: jest.fn().mockReturnValue([
         {
             "mongodb.password": "testpassword"
         }
-    ]),
-    getEnvCache: jest.fn()
+    ])
 }));
 
 let mongo: MongoMemoryServer;

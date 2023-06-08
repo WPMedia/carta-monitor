@@ -1,7 +1,8 @@
-import { closeOpenAlert, createAlert } from "../opsGenieHelpers";
+import { closeOpenAlert, createAlert } from "../opsGenie";
 import { CartaAlerts } from "../alerts";
-import { getEnvCache, getParametersFromSSM } from "../helpers";
 import fetch from "cross-fetch";
+import { getSsmCache } from "../ssm";
+import { getEnvCache } from "../environmentVariables";
 
 const sendEvent = {
     subject:
@@ -26,9 +27,9 @@ type SendResult =
     | { error: Error };
 
 const sendEmail = async () => {
-    const cartaSenderKey = (
-        await getParametersFromSSM(["carta.sender.endpoint.access.key"])
-    )[0].value;
+    const cartaSenderKey = (await getSsmCache())[
+        "carta.sender.endpoint.access.key"
+    ];
 
     const response = await fetch(getEnvCache().NONPERSONALIZED_SENDER_URL, {
         method: "POST",
@@ -39,6 +40,10 @@ const sendEmail = async () => {
         body: JSON.stringify(sendEvent)
     });
 
+    if (!response.ok) {
+        throw response;
+    }
+
     return (await response.json()) as SendResult;
 };
 
@@ -48,11 +53,11 @@ export const sender = async () => {
 
     try {
         result = await sendEmail();
-    } catch (error: any) {
-        sendError = JSON.stringify(error);
+    } catch (error) {
+        sendError = error.message;
     }
 
-    if ("error" in result || result.totalFailedSends > 0) {
+    if (!sendError && ("error" in result || result.totalFailedSends > 0)) {
         sendError = JSON.stringify(result);
     }
 

@@ -1,9 +1,9 @@
 import { Collection, ObjectId } from "mongodb";
 import { getMongoDatabase } from "../mongo";
 import { DateTime } from "luxon";
-import { closeOpenAlert, createAlert, escalateAlert } from "../opsGenieHelpers";
+import { closeOpenAlert, createAlert, escalateAlert } from "../opsGenie";
 import { CartaAlerts } from "../alerts";
-import { getEnvCache } from "../helpers";
+import { getEnvCache } from "../environmentVariables";
 
 export type NewsletterSend = {
     _id: ObjectId;

@@ -1,6 +1,7 @@
 import { Collection, Db, MongoClient } from "mongodb";
-import { getEnvCache, getParametersFromSSM } from "./helpers";
 import { NewsletterSend } from "./functions/campaignSendAlerts";
+import { getEnvCache } from "./environmentVariables";
+import { getSsmCache } from "./ssm";
 
 // In AWS Lambda, variables declared outside of the function handler, like cachedDb and cachedClient,
 // are cached between function invocations for the lifetime of the container instance of the function.
@@ -22,9 +23,10 @@ export const getMongoDatabase = async (): Promise<{
         return Promise.resolve({ db: cachedDb, client: cachedClient });
     }
 
-    const mongoConnectionStringPassword = (
-        await getParametersFromSSM(["mongodb.password"])
-    )[0].value;
+    const mongoConnectionStringPassword = await getSsmCache()[
+        "mongodb.password"
+    ];
+
     const mongoUri = getEnvCache().MONGODB_URI.replace(
         "{0}",
         mongoConnectionStringPassword

@@ -1,9 +1,9 @@
 import { Collection, Filter } from "mongodb";
 import { getMongoDatabase } from "../mongo";
-import { createAlert } from "../opsGenieHelpers";
+import { createAlert } from "../opsGenie";
 import { DateTime } from "luxon";
 import { CartaAlerts } from "../alerts";
-import { getEnvCache } from "../helpers";
+import { getEnvCache } from "../environmentVariables";
 
 type List = {
     name: string;

@@ -1,9 +1,9 @@
-import { closeOpenAlert, createAlert } from "../opsGenieHelpers";
+import { closeOpenAlert, createAlert } from "../opsGenie";
 import { NewsletterSend } from "./campaignSendAlerts";
 import { findMostRecentSend, getMongoDatabase, Send } from "../mongo";
 import { DateTime } from "luxon";
 import { CartaAlerts } from "../alerts";
-import { getEnvCache } from "../helpers";
+import { getEnvCache } from "../environmentVariables";
 
 const alerts: Record<
     Send,

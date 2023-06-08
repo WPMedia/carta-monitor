@@ -1,5 +1,5 @@
 import Carta, { CartaServer } from "@washingtonpost/carta-client-lib";
-import { getEnvCache } from "./helpers";
+import { getEnvCache } from "./environmentVariables";
 
 export const getCartaServer = () =>
     new CartaServer(

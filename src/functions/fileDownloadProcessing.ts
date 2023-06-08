@@ -1,7 +1,7 @@
 import { CartaAlerts } from "../alerts";
-import { getEnvCache } from "../helpers";
+import { getEnvCache } from "../environmentVariables";
 import { getMongoDatabase } from "../mongo";
-import { closeOpenAlert, createAlert } from "../opsGenieHelpers";
+import { closeOpenAlert, createAlert } from "../opsGenie";
 
 export const checkFileDownloadProcessing = async () => {
     const { db, client } = await getMongoDatabase();

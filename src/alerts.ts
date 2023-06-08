@@ -1,4 +1,4 @@
-import { getEnvCache } from "./helpers";
+import { getEnvCache } from "./environmentVariables";
 import { sendFilters } from "./mongo";
 
 export enum Priority {

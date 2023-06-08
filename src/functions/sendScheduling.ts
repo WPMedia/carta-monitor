@@ -1,11 +1,11 @@
 import * as dotenv from "dotenv";
 dotenv.config();
 import { DateTime } from "luxon";
-import { closeOpenAlert, createAlert } from "../opsGenieHelpers";
+import { closeOpenAlert, createAlert } from "../opsGenie";
 import { getCartaServer } from "../cartaServer";
 import { CartaAlerts } from "../alerts";
 import { Send } from "../mongo";
-import { getEnvCache } from "../helpers";
+import { getEnvCache } from "../environmentVariables";
 
 const createAndSendLetter = async (letterType: Send, campaignId: string) => {
     const formattedDate = DateTime.fromJSDate(new Date()).toFormat(

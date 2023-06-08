@@ -1,16 +1,17 @@
 import { CartaAlerts } from "../alerts";
-import { getEnvCache } from "../helpers";
-import { closeOpenAlert, createAlert } from "../opsGenieHelpers";
+import { getEnvCache } from "../environmentVariables";
+import { closeOpenAlert, createAlert } from "../opsGenie";
 import { checkMetricsProcessing } from "./metricsProcessing";
 
-jest.mock("../helpers", () => ({
-    getParametersFromSSM: jest
-        .fn()
-        .mockReturnValue([{ value: "mockPassword" }]),
+jest.mock("../environmentVariables", () => ({
     getEnvCache: jest.fn()
 }));
 
-jest.mock("../opsGenieHelpers", () => ({
+jest.mock("../ssm", () => ({
+    getSsmCache: jest.fn().mockReturnValue([{ value: "mockPassword" }])
+}));
+
+jest.mock("../opsGenie", () => ({
     closeOpenAlert: jest.fn(),
     createAlert: jest.fn(),
     CartaAlerts: {

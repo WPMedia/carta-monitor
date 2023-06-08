@@ -5,22 +5,25 @@ import {
 } from "./dynamicListProcessing";
 import { MongoMemoryServer } from "mongodb-memory-server";
 import { getMongoDatabase } from "../mongo";
-import { createAlert } from "../opsGenieHelpers";
+import { createAlert } from "../opsGenie";
 import { Db, MongoClient } from "mongodb";
 import { CartaAlerts } from "../alerts";
-import { getEnvCache } from "../helpers";
+import { getEnvCache } from "../environmentVariables";
 
-jest.mock("../opsGenieHelpers", () => ({
+jest.mock("../opsGenie", () => ({
     createAlert: jest.fn()
 }));
 
-jest.mock("../helpers", () => ({
-    getParametersFromSSM: jest.fn().mockReturnValue([
+jest.mock("../environmentVariables", () => ({
+    getEnvCache: jest.fn()
+}));
+
+jest.mock("../ssm", () => ({
+    getSsmCache: jest.fn().mockReturnValue([
         {
             "mongodb.password": "testpassword"
         }
-    ]),
-    getEnvCache: jest.fn()
+    ])
 }));
 
 let mongo: MongoMemoryServer;

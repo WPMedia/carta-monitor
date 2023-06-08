@@ -1,9 +1,9 @@
-import { closeOpenAlert, createAlert } from "../opsGenieHelpers";
+import { closeOpenAlert, createAlert } from "../opsGenie";
 import { checkFileDownloadProcessing } from "./fileDownloadProcessing";
 import { getMongoDatabase } from "../mongo";
 import { CartaAlerts } from "../alerts";
 
-jest.mock("../opsGenieHelpers", () => ({
+jest.mock("../opsGenie", () => ({
     closeOpenAlert: jest.fn(),
     createAlert: jest.fn(),
     CartaAlerts: {
@@ -25,7 +25,7 @@ jest.mock("../mongo", () => ({
     })
 }));
 
-jest.mock("../helpers", () => ({
+jest.mock("../environmentVariables", () => ({
     getEnvCache: jest
         .fn()
         .mockReturnValue({ NONPERSONALIZED_CAMPAIGN_ID: "campaignId" })
