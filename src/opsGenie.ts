@@ -1,9 +1,11 @@
-import fetch from "cross-fetch"; // Using node-fetch for compatibility with Node.js
+import fetch from "cross-fetch";
 import { CartaAlerts, Priority, alertDetails } from "./alerts";
 import { getEnvCache } from "./environmentVariables";
 import { getSsmCache } from "./ssm";
 
 type HttpMethod = "GET" | "POST" | "PUT" | "DELETE" | "PATCH" | "OPTIONS";
+
+const OPS_GENIE_BASE_URL = `https://api.opsgenie.com/v2/alerts/`;
 
 async function makeOpsGenieRequest(
     path: string,
@@ -17,8 +19,8 @@ async function makeOpsGenieRequest(
 }> {
     const opsGenieKey = (await getSsmCache())["ops.genie.api.key"];
 
-    const response = await fetch(`https://api.opsgenie.com/v2/alerts/${path}`, {
-        method: method,
+    const response = await fetch(`${OPS_GENIE_BASE_URL}${path}`, {
+        method,
         headers: {
             Authorization: `GenieKey ${opsGenieKey}`,
             "Content-Type": "application/json"
@@ -27,6 +29,7 @@ async function makeOpsGenieRequest(
     });
 
     if (!response.ok) {
+        console.error(`Error in OpsGenie Request: ${response.statusText}`);
         throw response;
     }
 
