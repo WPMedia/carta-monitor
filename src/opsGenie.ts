@@ -17,7 +17,8 @@ async function makeOpsGenieRequest(
     requestId: string;
     data?: { count: number };
 }> {
-    const opsGenieKey = (await getSsmCache())["ops.genie.api.key"];
+    const ssmCache = await getSsmCache();
+    const opsGenieKey = ssmCache["ops.genie.api.key"];
 
     const response = await fetch(`${OPS_GENIE_BASE_URL}${path}`, {
         method,

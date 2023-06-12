@@ -27,9 +27,8 @@ type SendResult =
     | { error: Error };
 
 const sendEmail = async () => {
-    const cartaSenderKey = (await getSsmCache())[
-        "carta.sender.endpoint.access.key"
-    ];
+    const ssmCache = await getSsmCache();
+    const cartaSenderKey = ssmCache["carta.sender.endpoint.access.key"];
 
     const response = await fetch(getEnvCache().NONPERSONALIZED_SENDER_URL, {
         method: "POST",

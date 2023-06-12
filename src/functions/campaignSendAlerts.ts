@@ -11,7 +11,7 @@ export type NewsletterSend = {
     metricsSentEmails: number;
     metricsSentEmailsErr: number;
     scheduledSendTime: string;
-    sendState: SendState;
+    sendState?: SendState;
     statusWaitTimestamp: number;
     totalSendSize: number;
     statusDoneTimestamp: Date;

@@ -3,8 +3,7 @@ import {
     NewsletterSend,
     SendState,
     campaignSendAlerts,
-    evaluateNewsletterSend,
-    updateSendState
+    evaluateNewsletterSend
 } from "./campaignSendAlerts";
 import { Collection, Db, MongoClient, ObjectId } from "mongodb";
 import { getMongoDatabase } from "../mongo";
@@ -63,233 +62,169 @@ afterAll(async () => {
 });
 
 const now = DateTime.now();
-const someObjectId = new ObjectId();
-const defaultSend = {
-    _id: someObjectId,
-    letterId: "someLetterId",
-    metricsSentEmails: 900000,
-    metricsSentEmailsErr: 100000,
-    scheduledSendTime: now.toISO(),
-    statusWaitTimestamp: now.minus({ minutes: 1 }).toMillis(),
-    totalSendSize: 101
-} as NewsletterSend;
+
+const createSend = (overrides: Partial<NewsletterSend> = {}) => {
+    const now = DateTime.now();
+    const baseSend: NewsletterSend = {
+        _id: new ObjectId(),
+        letterId: "someLetterId",
+        metricsSentEmails: 900000,
+        metricsSentEmailsErr: 100000,
+        scheduledSendTime: now.toISO(),
+        statusWaitTimestamp: now.minus({ minutes: 1 }).toMillis(),
+        totalSendSize: 101,
+        statusDoneTimestamp: now.toJSDate()
+    };
+
+    return { ...baseSend, ...overrides };
+};
+
+const checkState = (sendData: NewsletterSend, expectedState: SendState) => {
+    const result = evaluateNewsletterSend(sendData);
+    expect(result).toEqual({ state: expectedState, id: sendData._id });
+};
 
 describe("evaluateNewsletterSend", () => {
-    test("should return null if no sends have been attempted", () => {
-        const result = evaluateNewsletterSend({
-            ...defaultSend,
-            metricsSentEmails: 0,
-            metricsSentEmailsErr: 0
+    describe('Tests for "done" state', () => {
+        test("send percentage is equal to the successful send completion percentage", () => {
+            const send = createSend();
+            checkState(send, "done");
         });
 
-        expect(result).toBeNull();
-    });
-
-    test("should return state as 'done' when send percentage is equal to the successful send completion percentage", () => {
-        const result = evaluateNewsletterSend(defaultSend);
-
-        expect(result).toEqual({ state: "done", id: someObjectId });
-    });
-
-    test("should return state as 'done' when send percentage is greater than the successful send completion percentage", () => {
-        const result = evaluateNewsletterSend({
-            ...defaultSend,
-            metricsSentEmails: 1000000,
-            metricsSentEmailsErr: 100000
+        test("send percentage is greater than the successful send completion percentage", () => {
+            const send = createSend({
+                metricsSentEmails: 1000000,
+                metricsSentEmailsErr: 100000
+            });
+            checkState(send, "done");
         });
 
-        expect(result).toEqual({ state: "done", id: someObjectId });
-    });
-
-    test("should return state as 'warning' when send incomplete and minutes since scheduled send is greater than the alloted minutes for a P1 alert", () => {
-        const result = evaluateNewsletterSend({
-            ...defaultSend,
-            metricsSentEmails: 899999,
-            metricsSentEmailsErr: 100000,
-            scheduledSendTime: now.minus({ minutes: 31 }).toISO()
+        test("send percentage is equal to the successful send completion percentage with large segmentCount", () => {
+            const send = createSend({
+                metricsSentEmails: 1800000,
+                metricsSentEmailsErr: 200000
+            });
+            checkState(send, "done");
         });
 
-        expect(result).toEqual({ state: "warning", id: someObjectId });
-    });
-
-    test("should return state as 'warning' when send incomplete and minutes since scheduled send is equal to the alloted minutes for a P1 alert", () => {
-        const result = evaluateNewsletterSend({
-            ...defaultSend,
-            metricsSentEmails: 899999,
-            metricsSentEmailsErr: 100000,
-            scheduledSendTime: now.minus({ minutes: 30 }).toISO()
-        });
-
-        expect(result).toEqual({ state: "warning", id: someObjectId });
-    });
-
-    test("should return state as 'alarm' when minutes since scheduled send is greater than the alloted minutes for a P0 alert", () => {
-        const result = evaluateNewsletterSend({
-            ...defaultSend,
-            metricsSentEmails: 899999,
-            metricsSentEmailsErr: 100000,
-            scheduledSendTime: now.minus({ minutes: 91 }).toISO()
-        });
-
-        expect(result).toEqual({
-            state: "alarm",
-            id: someObjectId
+        test("send percentage is equal to the successful send completion percentage with even larger segmentCount", () => {
+            const send = createSend({
+                metricsSentEmails: 2700000,
+                metricsSentEmailsErr: 300000
+            });
+            checkState(send, "done");
         });
     });
 
-    test("should return state as 'alarm' when minutes since scheduled send is equal to the alloted minutes for a P0 alert", () => {
-        const result = evaluateNewsletterSend({
-            ...defaultSend,
-            metricsSentEmails: 899999,
-            metricsSentEmailsErr: 100000,
-            scheduledSendTime: now.minus({ minutes: 90 }).toISO()
+    describe('Tests for "warning" state', () => {
+        test("send incomplete and minutes since scheduled send is greater than the allotted minutes for a P1 alert", () => {
+            const send = createSend({
+                metricsSentEmails: 899999,
+                metricsSentEmailsErr: 100000,
+                scheduledSendTime: DateTime.now().minus({ minutes: 31 }).toISO()
+            });
+            checkState(send, "warning");
         });
 
-        expect(result).toEqual({ state: "alarm", id: someObjectId });
-    });
+        test("send incomplete and minutes since scheduled send is greater than the alloted minutes for a P1 alert with large segmentCount", () => {
+            const send = createSend({
+                metricsSentEmails: 1799998,
+                metricsSentEmailsErr: 200000,
+                scheduledSendTime: DateTime.now().minus({ minutes: 61 }).toISO()
+            });
+            checkState(send, "warning");
+        });
 
-    test("should create multiple warning alerts when there are multiple eligible newsletters", () => {
-        const newsletterSends = [
-            {
+        test("send incomplete and minutes since scheduled send is greater than the alloted minutes for a P1 alert with even larger segmentCount", () => {
+            const send = createSend({
+                metricsSentEmails: 2699997,
+                metricsSentEmailsErr: 300000,
+                scheduledSendTime: DateTime.now().minus({ minutes: 91 }).toISO()
+            });
+            checkState(send, "warning");
+        });
+
+        test("should create multiple warning alerts when there are multiple eligible newsletters", () => {
+            const send1 = createSend({
                 _id: id1,
                 letterId: "newsletter1",
                 metricsSentEmails: 500000,
                 metricsSentEmailsErr: 100000,
-                scheduledSendTime: now.minus({ minutes: 35 }).toISO()
-            } as NewsletterSend,
-            {
+                scheduledSendTime: DateTime.now().minus({ minutes: 35 }).toISO()
+            });
+            const send2 = createSend({
                 _id: id2,
                 letterId: "newsletter2",
                 metricsSentEmails: 700000,
                 metricsSentEmailsErr: 100000,
-                scheduledSendTime: now.minus({ minutes: 40 }).toISO()
-            } as NewsletterSend
-        ];
+                scheduledSendTime: DateTime.now().minus({ minutes: 40 }).toISO()
+            });
+            const newsletterSends = [send1, send2];
 
-        const results = newsletterSends.map((newsletterSend) =>
-            evaluateNewsletterSend(newsletterSend)
-        );
+            const results = newsletterSends.map((send) =>
+                evaluateNewsletterSend(send)
+            );
+            const warningAlertIds = results
+                .filter((result) => result && result.state === "warning")
+                .map((result) => result.id);
 
-        const warningAlertIds = results
-            .filter((result) => result && result.state === "warning")
-            .map((result) => result.id);
-
-        expect(warningAlertIds).toEqual([id1, id2]);
+            expect(warningAlertIds).toEqual([id1, id2]);
+        });
     });
 
-    test("should return state as 'done' when send percentage is equal to the successful send completion percentage with large segmentCount", () => {
-        const result = evaluateNewsletterSend({
-            ...defaultSend,
-            metricsSentEmails: 1800000,
-            metricsSentEmailsErr: 200000
+    describe('Tests for "alarm" state', () => {
+        test("should return state as 'alarm' when minutes since scheduled send is greater than the allotted minutes for a P0 alert", () => {
+            const send = createSend({
+                metricsSentEmails: 899999,
+                metricsSentEmailsErr: 100000,
+                scheduledSendTime: DateTime.now().minus({ minutes: 91 }).toISO()
+            });
+            checkState(send, "alarm");
         });
 
-        expect(result).toEqual({ state: "done", id: someObjectId });
-    });
-
-    test("should return state as 'warning' when send incomplete and minutes since scheduled send is greater than the alloted minutes for a P1 alert with large segmentCount", () => {
-        const result = evaluateNewsletterSend({
-            ...defaultSend,
-            metricsSentEmails: 1799998,
-            metricsSentEmailsErr: 200000,
-            scheduledSendTime: now.minus({ minutes: 61 }).toISO()
+        test("should return state as 'alarm' when minutes since scheduled send is greater than the alloted minutes for a P0 alert with large segmentCount", () => {
+            const send = createSend({
+                metricsSentEmails: 1799998,
+                metricsSentEmailsErr: 200000,
+                scheduledSendTime: DateTime.now()
+                    .minus({ minutes: 121 })
+                    .toISO()
+            });
+            checkState(send, "alarm");
         });
 
-        expect(result).toEqual({ state: "warning", id: someObjectId });
+        test("should return state as 'alarm' when minutes since scheduled send is greater than the alloted minutes for a P0 alert with even larger segmentCount", () => {
+            const send = createSend({
+                metricsSentEmails: 2699997,
+                metricsSentEmailsErr: 300000,
+                scheduledSendTime: DateTime.now()
+                    .minus({ minutes: 151 })
+                    .toISO()
+            });
+
+            checkState(send, "alarm");
+        });
     });
 
-    test("should return state as 'alarm' when minutes since scheduled send is greater than the alloted minutes for a P0 alert with large segmentCount", () => {
-        const result = evaluateNewsletterSend({
-            ...defaultSend,
-            metricsSentEmails: 1799998,
-            metricsSentEmailsErr: 200000,
-            scheduledSendTime: now.minus({ minutes: 121 }).toISO()
+    describe("Tests for no newsletter states set", () => {
+        test("should return null if no sends have been attempted", () => {
+            const send = createSend({
+                metricsSentEmails: 0,
+                metricsSentEmailsErr: 0
+            });
+            const result = evaluateNewsletterSend(send);
+            expect(result).toBeNull();
         });
 
-        expect(result).toEqual({ state: "alarm", id: someObjectId });
-    });
-
-    test("should return state as 'done' when send percentage is equal to the successful send completion percentage with even larger segmentCount", () => {
-        const result = evaluateNewsletterSend({
-            ...defaultSend,
-            metricsSentEmails: 2700000,
-            metricsSentEmailsErr: 300000
+        test("should return null if send is before alloted minutes time", () => {
+            const send = createSend({
+                metricsSentEmails: 1799998,
+                metricsSentEmailsErr: 200000,
+                scheduledSendTime: DateTime.now().minus({ minutes: 29 }).toISO()
+            });
+            const result = evaluateNewsletterSend(send);
+            expect(result).toBeNull();
         });
-
-        expect(result).toEqual({ state: "done", id: someObjectId });
-    });
-
-    test("should return state as 'warning' when send incomplete and minutes since scheduled send is greater than the alloted minutes for a P1 alert with even larger segmentCount", () => {
-        const result = evaluateNewsletterSend({
-            ...defaultSend,
-            metricsSentEmails: 2699997,
-            metricsSentEmailsErr: 300000,
-            scheduledSendTime: now.minus({ minutes: 91 }).toISO()
-        });
-
-        expect(result).toEqual({ state: "warning", id: someObjectId });
-    });
-
-    test("should return state as 'alarm' when minutes since scheduled send is greater than the alloted minutes for a P0 alert with even larger segmentCount", () => {
-        const result = evaluateNewsletterSend({
-            ...defaultSend,
-            metricsSentEmails: 2699997,
-            metricsSentEmailsErr: 300000,
-            scheduledSendTime: now.minus({ minutes: 151 }).toISO()
-        });
-
-        expect(result).toEqual({ state: "alarm", id: someObjectId });
-    });
-});
-
-describe("Update newsletter send state", () => {
-    let nlSendCollection: Collection<any>;
-
-    beforeEach(async () => {
-        nlSendCollection = db.collection("nlSend");
-    });
-
-    it("should set sendState to done", async () => {
-        const doneIds = [new ObjectId(), new ObjectId(), new ObjectId()];
-        await nlSendCollection.insertOne({ defaultSend });
-        await updateSendState(nlSendCollection, doneIds, "done");
-
-        const docs = await nlSendCollection
-            .find({ _id: { $in: doneIds.map((id) => new ObjectId(id)) } })
-            .toArray();
-        docs.forEach((doc) => expect(doc.sendState).toBe("done"));
-    });
-
-    it("should set sendState to warning", async () => {
-        const warningIds = [new ObjectId(), new ObjectId(), new ObjectId()];
-        await nlSendCollection.insertMany(
-            warningIds.map((id) => ({
-                _id: new ObjectId(id),
-                sendState: "" as SendState
-            }))
-        );
-        await updateSendState(nlSendCollection, warningIds, "warning");
-
-        const docs = await nlSendCollection
-            .find({ _id: { $in: warningIds.map((id) => new ObjectId(id)) } })
-            .toArray();
-        docs.forEach((doc) => expect(doc.sendState).toBe("warning"));
-    });
-
-    it("should set sendState to alarm", async () => {
-        const alarmIds = [new ObjectId(), new ObjectId(), new ObjectId()];
-        await nlSendCollection.insertMany(
-            alarmIds.map((id) => ({
-                _id: new ObjectId(id),
-                sendState: "" as SendState
-            }))
-        );
-        await updateSendState(nlSendCollection, alarmIds, "alarm");
-
-        const docs = await nlSendCollection
-            .find({ _id: { $in: alarmIds.map((id) => new ObjectId(id)) } })
-            .toArray();
-        docs.forEach((doc) => expect(doc.sendState).toBe("alarm"));
     });
 });
 
@@ -302,20 +237,19 @@ describe("Call alerts", () => {
 
     it("should call closeAlert if there are <2 warning sends", async () => {
         await nlSendCollection.insertMany([
-            {
-                ...defaultSend,
+            createSend({
                 _id: id1,
                 metricsSentEmails: 1000000,
                 metricsSentEmailsErr: 100000
-            },
-            {
-                ...defaultSend,
+            }),
+            createSend({
                 _id: id2,
                 metricsSentEmails: 899999,
                 metricsSentEmailsErr: 100000,
                 scheduledSendTime: now.minus({ minutes: 30 }).toISO()
-            }
+            })
         ]);
+
         await campaignSendAlerts();
         expect(closeOpenAlert).toHaveBeenCalled();
 
@@ -327,21 +261,20 @@ describe("Call alerts", () => {
 
     it("should call createAlert if there are 2 warning sends", async () => {
         await nlSendCollection.insertMany([
-            {
-                ...defaultSend,
+            createSend({
                 _id: id1,
                 metricsSentEmails: 70000,
                 metricsSentEmailsErr: 100000,
                 scheduledSendTime: now.minus({ minutes: 30 }).toISO()
-            },
-            {
-                ...defaultSend,
+            }),
+            createSend({
                 _id: id2,
                 metricsSentEmails: 899999,
                 metricsSentEmailsErr: 100000,
                 scheduledSendTime: now.minus({ minutes: 30 }).toISO()
-            }
+            })
         ]);
+
         await campaignSendAlerts();
         expect(createAlert).toHaveBeenCalled();
 
@@ -353,21 +286,20 @@ describe("Call alerts", () => {
 
     it("should call escalateAlert if there is an alarm send", async () => {
         await nlSendCollection.insertMany([
-            {
-                ...defaultSend,
+            createSend({
                 _id: id1,
                 metricsSentEmails: 70000,
                 metricsSentEmailsErr: 100000,
                 scheduledSendTime: now.minus({ minutes: 30 }).toISO()
-            },
-            {
-                ...defaultSend,
+            }),
+            createSend({
                 _id: id2,
                 metricsSentEmails: 899999,
                 metricsSentEmailsErr: 100000,
                 scheduledSendTime: now.minus({ minutes: 121 }).toISO() // cause alarm
-            }
+            })
         ]);
+
         await campaignSendAlerts();
         expect(escalateAlert).toHaveBeenCalled();
 
