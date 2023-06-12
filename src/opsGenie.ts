@@ -20,7 +20,8 @@ async function makeOpsGenieRequest(
     const ssmCache = await getSsmCache();
     const opsGenieKey = ssmCache["ops.genie.api.key"];
 
-    const response = await fetch(`${OPS_GENIE_BASE_URL}${path}`, {
+    const endpoint = `${OPS_GENIE_BASE_URL}${path}`;
+    const response = await fetch(endpoint, {
         method,
         headers: {
             Authorization: `GenieKey ${opsGenieKey}`,
@@ -30,7 +31,9 @@ async function makeOpsGenieRequest(
     });
 
     if (!response.ok) {
-        console.error(`Error in OpsGenie Request: ${response.statusText}`);
+        console.error(
+            `Error in OpsGenie Request ${endpoint}: ${response.statusText}`
+        );
         throw response;
     }
 
