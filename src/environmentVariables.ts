@@ -14,25 +14,26 @@ enum EnvVars {
     IS_LOCAL = "IS_LOCAL"
 }
 
-type EnvVarValues = { [K in EnvVars]?: string };
-
-let envCache: EnvVarValues;
+type EnvVarValues = { [K in EnvVars]: string };
 
 const getAndCheckRequiredEnvVars = () => {
+    const cache: Partial<EnvVarValues> = {};
+
     for (const varName of Object.values(EnvVars)) {
         const value = process.env[varName];
+
+        // Checks both for missing variables and empty/null strings
         if (!value) {
-            throw new Error(`Missing ${varName} in environment variables`);
+            throw new Error(
+                `Missing or empty ${varName} in environment variables`
+            );
         } else {
-            envCache[varName as EnvVars] = value;
+            cache[varName as EnvVars] = value;
         }
     }
+
+    // Type assertion is safe here because we've filled in all properties
+    return cache as EnvVarValues;
 };
 
-export const getEnvCache = (): EnvVarValues => {
-    if (!envCache) {
-        envCache = {};
-        getAndCheckRequiredEnvVars();
-    }
-    return envCache;
-};
+export const environmentVariables = getAndCheckRequiredEnvVars();

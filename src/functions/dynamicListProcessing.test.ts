@@ -6,16 +6,16 @@ import {
 import { MongoMemoryServer } from "mongodb-memory-server";
 import { getMongoDatabase } from "../mongo";
 import { createAlert } from "../opsGenie";
-import { Db, MongoClient } from "mongodb";
+import { Collection, Db, Document, MongoClient } from "mongodb";
 import { CartaAlerts } from "../alerts";
-import { getEnvCache } from "../environmentVariables";
+import { environmentVariables } from "../environmentVariables";
 
 jest.mock("../opsGenie", () => ({
     createAlert: jest.fn()
 }));
 
 jest.mock("../environmentVariables", () => ({
-    getEnvCache: jest.fn()
+    environmentVariables: {}
 }));
 
 jest.mock("../ssm", () => ({
@@ -36,10 +36,7 @@ beforeAll(async () => {
     mongo = await MongoMemoryServer.create();
     const uri = mongo.getUri();
 
-    (getEnvCache as jest.Mock).mockImplementation(() => ({
-        MONGODB_URI: uri,
-        MONGODB_NAME: "test-db"
-    }));
+    environmentVariables.MONGODB_URI = uri;
 
     const connection = await getMongoDatabase();
     db = connection.db;
@@ -59,6 +56,16 @@ afterAll(async () => {
     await mongo.stop();
 });
 
+const expectDateTimeToEqual = (dateTime: DateTime, expected: DateTime) => {
+    expect(dateTime.year).toBe(expected.year);
+    expect(dateTime.month).toBe(expected.month);
+    expect(dateTime.day).toBe(expected.day);
+    expect(dateTime.hour).toBe(expected.hour);
+    expect(dateTime.minute).toBe(expected.minute);
+    expect(dateTime.second).toBe(expected.second);
+    expect(dateTime.millisecond).toBe(expected.millisecond);
+};
+
 describe("getMostRecentQuarterHour", () => {
     const topOfHourTime = DateTime.fromISO("2023-05-31T10:59:59.999");
     const quarterHourTime = DateTime.fromISO("2023-05-31T10:14:59.999");
@@ -66,58 +73,45 @@ describe("getMostRecentQuarterHour", () => {
 
     it("returns the most recent quarter hour near the top of the hour", () => {
         const mostRecentQuarterHour = getMostRecentQuarterHour(topOfHourTime);
-
-        expect(mostRecentQuarterHour.year).toBe(2023);
-        expect(mostRecentQuarterHour.month).toBe(5);
-        expect(mostRecentQuarterHour.day).toBe(31);
-        expect(mostRecentQuarterHour.hour).toBe(10);
-        expect(mostRecentQuarterHour.minute).toBe(45);
-        expect(mostRecentQuarterHour.second).toBe(0);
-        expect(mostRecentQuarterHour.millisecond).toBe(0);
+        expectDateTimeToEqual(
+            mostRecentQuarterHour,
+            DateTime.fromISO("2023-05-31T10:45:00.000")
+        );
     });
 
     it("returns the most recent quarter hour near the quarter hour", () => {
         const mostRecentQuarterHour = getMostRecentQuarterHour(quarterHourTime);
-
-        expect(mostRecentQuarterHour.year).toBe(2023);
-        expect(mostRecentQuarterHour.month).toBe(5);
-        expect(mostRecentQuarterHour.day).toBe(31);
-        expect(mostRecentQuarterHour.hour).toBe(10);
-        expect(mostRecentQuarterHour.minute).toBe(0);
-        expect(mostRecentQuarterHour.second).toBe(0);
-        expect(mostRecentQuarterHour.millisecond).toBe(0);
+        expectDateTimeToEqual(
+            mostRecentQuarterHour,
+            DateTime.fromISO("2023-05-31T10:00:00.000")
+        );
     });
 
     it("returns the most recent quarter hour exactly on the quarter hour", () => {
         const mostRecentQuarterHour =
             getMostRecentQuarterHour(exactQuarterHourTime);
-
-        expect(mostRecentQuarterHour.year).toBe(2023);
-        expect(mostRecentQuarterHour.month).toBe(5);
-        expect(mostRecentQuarterHour.day).toBe(31);
-        expect(mostRecentQuarterHour.hour).toBe(10);
-        expect(mostRecentQuarterHour.minute).toBe(15);
-        expect(mostRecentQuarterHour.second).toBe(0);
-        expect(mostRecentQuarterHour.millisecond).toBe(0);
+        expectDateTimeToEqual(
+            mostRecentQuarterHour,
+            DateTime.fromISO("2023-05-31T10:15:00.000")
+        );
     });
 });
 
 describe("checkDynamicListProcessing", () => {
     let createAlertMock: jest.Mock;
+    let lmListsCollection: Collection<Document>;
 
     beforeEach(() => {
         createAlertMock = createAlert as jest.Mock;
         createAlertMock.mockClear();
+        lmListsCollection = db.collection("lm_lists");
     });
 
     afterEach(async () => {
-        const lmListsCollection = db.collection("lm_lists");
         await lmListsCollection.deleteMany({});
     });
 
     it("does not create alerts when lists are processing", async () => {
-        const lmListsCollection = db.collection("lm_lists");
-        await lmListsCollection.deleteMany({});
         await lmListsCollection.insertMany([
             {
                 type: "DYNAMIC",
@@ -145,9 +139,6 @@ describe("checkDynamicListProcessing", () => {
     });
 
     it("creates an alert when an auto-run list is not processing", async () => {
-        const lmListsCollection = db.collection("lm_lists");
-        await lmListsCollection.deleteMany({});
-
         const triggerWindow = testingDateTime
             .minus({ hours: 25, minutes: 31 })
             .toISO();
@@ -173,9 +164,6 @@ describe("checkDynamicListProcessing", () => {
     });
 
     it("creates an alert when a scheduled list is not processing", async () => {
-        const lmListsCollection = db.collection("lm_lists");
-        await lmListsCollection.deleteMany({});
-
         const triggerWindow = testingDateTime.minus({
             hours: 25,
             minutes: 31

@@ -5,7 +5,7 @@ import { closeOpenAlert, createAlert } from "../opsGenie";
 import { getCartaServer } from "../cartaServer";
 import { CartaAlerts } from "../alerts";
 import { Send } from "../mongo";
-import { getEnvCache } from "../environmentVariables";
+import { environmentVariables } from "../environmentVariables";
 
 const createAndSendLetter = async (letterType: Send, campaignId: string) => {
     const formattedDate = DateTime.fromJSDate(new Date()).toFormat(
@@ -45,17 +45,17 @@ export const sendScheduling = async () => {
         {
             letterType: "nonpersonalized",
             alertType: CartaAlerts.Schedule_Nonpersonalized_Send,
-            campaignId: getEnvCache().NONPERSONALIZED_CAMPAIGN_ID
+            campaignId: environmentVariables.NONPERSONALIZED_CAMPAIGN_ID
         },
         {
             letterType: "personalized",
             alertType: CartaAlerts.Schedule_Personalized_Send,
-            campaignId: getEnvCache().PERSONALIZED_CAMPAIGN_ID
+            campaignId: environmentVariables.PERSONALIZED_CAMPAIGN_ID
         },
         {
             letterType: "transactional",
             alertType: CartaAlerts.Schedule_Transactional_Send,
-            campaignId: getEnvCache().TRANSACTIONAL_CAMPAIGN_ID
+            campaignId: environmentVariables.TRANSACTIONAL_CAMPAIGN_ID
         }
     ];
     for (const send of sends) {

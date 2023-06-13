@@ -2,7 +2,7 @@ import { GetParameterCommand, SSMClient } from "@aws-sdk/client-ssm";
 import { closeOpenAlert, createAlert } from "../opsGenie";
 import fetch from "cross-fetch"; // Using node-fetch for compatibility with Node.js
 import { CartaAlerts } from "../alerts";
-import { getEnvCache } from "../environmentVariables";
+import { environmentVariables } from "../environmentVariables";
 
 export const testAlert = async () => {
     try {
@@ -12,17 +12,17 @@ export const testAlert = async () => {
         });
         const getParameterCommand = new GetParameterCommand({
             Name: `/carta/${
-                getEnvCache().STAGE === "PROD" ? "prod" : "sandbox"
+                environmentVariables.STAGE === "PROD" ? "prod" : "sandbox"
             }/list.management.user.token.carta.monitor`
         });
 
         const data = await ssmClient.send(getParameterCommand);
         const listManagementToken = data.Parameter?.Value;
         const body = JSON.stringify({
-            campaign_name: getEnvCache().ALERT_CAMPAIGN_NAME as string,
+            campaign_name: environmentVariables.ALERT_CAMPAIGN_NAME as string,
             send_time: Date.now(),
             variables: {
-                emailList: [getEnvCache().ALERT_EMAIL_LIST],
+                emailList: [environmentVariables.ALERT_EMAIL_LIST],
                 literalJson: {
                     ln: "Carta",
                     fn: "Monitor"
@@ -30,7 +30,7 @@ export const testAlert = async () => {
             }
         });
         const response = await fetch(
-            getEnvCache().LIST_MANAGEMENT_SEND_ALERT as string,
+            environmentVariables.LIST_MANAGEMENT_SEND_ALERT as string,
             {
                 method: "POST",
                 headers: {
@@ -49,9 +49,7 @@ export const testAlert = async () => {
             return;
         }
         throw new Error(
-            `Alert fetch returned a failure response: ${
-                getEnvCache().LIST_MANAGEMENT_SEND_ALERT
-            } with body: ${body}`
+            `Alert fetch returned a failure response: ${environmentVariables.LIST_MANAGEMENT_SEND_ALERT} with body: ${body}`
         );
     } catch (error) {
         console.error(`Failed to send alert: ${error}`);

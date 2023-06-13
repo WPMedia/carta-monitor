@@ -6,7 +6,7 @@ import { MongoMemoryServer } from "mongodb-memory-server";
 import { closeOpenAlert, createAlert } from "../opsGenie";
 import { send } from "./send";
 import { CartaAlerts } from "../alerts";
-import { getEnvCache } from "../environmentVariables";
+import { environmentVariables } from "../environmentVariables";
 
 jest.mock("../opsGenie", () => ({
     closeOpenAlert: jest.fn(),
@@ -15,7 +15,7 @@ jest.mock("../opsGenie", () => ({
 }));
 
 jest.mock("../environmentVariables", () => ({
-    getEnvCache: jest.fn()
+    environmentVariables: {}
 }));
 
 jest.mock("../ssm", () => ({
@@ -34,11 +34,7 @@ beforeAll(async () => {
     mongo = await MongoMemoryServer.create();
     const uri = mongo.getUri();
 
-    (getEnvCache as jest.Mock).mockImplementation(() => ({
-        MONGODB_URI: uri,
-        MONGODB_NAME: "test-db"
-    }));
-
+    environmentVariables.MONGODB_URI = uri;
     const connection = await getMongoDatabase();
     db = connection.db;
     client = connection.client;

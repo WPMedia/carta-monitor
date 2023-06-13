@@ -1,5 +1,5 @@
 import { SSMClient, GetParameterCommand } from "@aws-sdk/client-ssm";
-import { getEnvCache } from "./environmentVariables";
+import { environmentVariables } from "./environmentVariables";
 
 const ssmParameterKeys = [
     "mongodb.password",
@@ -20,7 +20,7 @@ const getParametersFromSSM = async (): Promise<{
 
     for (const key of ssmParameterKeys) {
         const parameterName = `/carta/${
-            getEnvCache().STAGE === "PROD" ? "prod" : "sandbox"
+            environmentVariables.STAGE === "PROD" ? "prod" : "sandbox"
         }/${key}`;
 
         const getParameterCommand = new GetParameterCommand({

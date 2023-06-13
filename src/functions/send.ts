@@ -3,7 +3,7 @@ import { NewsletterSend } from "./campaignSendAlerts";
 import { findMostRecentSend, getMongoDatabase, Send } from "../mongo";
 import { DateTime } from "luxon";
 import { CartaAlerts } from "../alerts";
-import { getEnvCache } from "../environmentVariables";
+import { environmentVariables } from "../environmentVariables";
 
 const alerts: Record<
     Send,
@@ -87,7 +87,7 @@ export const send = async () => {
     // won't exit as long as there are open connections. However, in a production environment (e.g., on AWS Lambda),
     // connections are managed differently, so we want to keep them open for possible reuse across multiple
     // invocations of the function for performance reasons.
-    if (getEnvCache().IS_LOCAL) {
+    if (environmentVariables.IS_LOCAL) {
         await client.close();
     }
 };

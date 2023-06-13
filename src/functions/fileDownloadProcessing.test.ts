@@ -26,9 +26,7 @@ jest.mock("../mongo", () => ({
 }));
 
 jest.mock("../environmentVariables", () => ({
-    getEnvCache: jest
-        .fn()
-        .mockReturnValue({ NONPERSONALIZED_CAMPAIGN_ID: "campaignId" })
+    environmentVariables: {}
 }));
 
 describe("checkFileDownloadProcessing", () => {

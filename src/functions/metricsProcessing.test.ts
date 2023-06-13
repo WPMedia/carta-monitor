@@ -1,10 +1,12 @@
 import { CartaAlerts } from "../alerts";
-import { getEnvCache } from "../environmentVariables";
 import { closeOpenAlert, createAlert } from "../opsGenie";
 import { checkMetricsProcessing } from "./metricsProcessing";
 
 jest.mock("../environmentVariables", () => ({
-    getEnvCache: jest.fn()
+    environmentVariables: {
+        MONGODB_URI: "mongodb://localhost:27017/{0}",
+        MONGODB_NAME: "test-db"
+    }
 }));
 
 jest.mock("../ssm", () => ({
@@ -40,13 +42,6 @@ jest.mock("mongodb", () => {
             };
         })
     };
-});
-
-beforeAll(() => {
-    (getEnvCache as jest.Mock).mockImplementation(() => ({
-        MONGODB_URI: "mongodb://localhost:27017/{0}",
-        MONGODB_NAME: "test-db"
-    }));
 });
 
 describe("checkMetricsProcessing", () => {
