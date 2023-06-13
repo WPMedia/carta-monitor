@@ -31,9 +31,6 @@ async function makeOpsGenieRequest(
     });
 
     if (!response.ok) {
-        console.error(
-            `Error in OpsGenie Request ${endpoint}: ${response.statusText}`
-        );
         throw response;
     }
 
