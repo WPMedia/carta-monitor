@@ -40,16 +40,20 @@ export const testAlert = async () => {
                 body
             }
         );
-        const success = (await response.json()) as {
-            success: "success" | "failure";
+        const result = (await response.json()) as {
+            status: "success" | "failure";
         };
-        if (success.success === "success") {
+        if (result.status === "success") {
             console.log("Successfully sent alert");
             await closeOpenAlert(CartaAlerts.Alert_Send);
             return;
         }
         throw new Error(
-            `Alert fetch returned a failure response: ${environmentVariables.LIST_MANAGEMENT_SEND_ALERT} with body: ${body}`
+            `Alert fetch returned a failure response: ${JSON.stringify(
+                result
+            )}; ${
+                environmentVariables.LIST_MANAGEMENT_SEND_ALERT
+            } with body: ${body}`
         );
     } catch (error) {
         console.error(`Failed to send alert: ${error}`);

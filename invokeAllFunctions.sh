@@ -23,7 +23,7 @@ echo "Invoking serverless functions locally. This script will exit with a failur
 # Loop over the services and invoke each one
 for service in "${services[@]}"; do
     # Echo to the console which service is being invoked for clearer logging
-    echo "Invoking $service"
+    echo "Invoking $service function:"
     if ! serverless invoke local --function "$service"; then
         # If the service fails to invoke, echo a failure message and exit the script with a status code of 1
         echo "Invocation of $service failed" >&2
