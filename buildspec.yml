@@ -1,0 +1,26 @@
+version: 0.2
+
+env:
+    variables:
+        LC_ALL: C.UTF-8
+        LANG: C.UTF-8
+
+phases:
+    install:
+        runtime-versions:
+            nodejs: 16
+        commands:
+            - env | sort
+            - cd $CODEBUILD_SRC_DIR
+            - echo "Updating npm (if available)..."
+            - npm install -g npm
+            - echo "Installing Serverless framework and other Node.js dependencies for project..."
+            - npm install -g serverless
+            - npm ci || npm install
+
+    build:
+        commands:
+            - test ${CODEBUILD_BUILD_SUCCEEDING} -eq 1 || exit 1
+            - cd $CODEBUILD_SRC_DIR
+            - echo "Deploying Serverless artifacts for stage ${SERVERLESS_STAGE} in region ${SERVERLESS_REGION}..."
+            - SLS_DEBUG=* serverless deploy --verbose --stage ${SERVERLESS_STAGE} --region ${SERVERLESS_REGION}
