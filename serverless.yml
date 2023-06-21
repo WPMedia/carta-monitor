@@ -22,7 +22,7 @@ provider:
         CARTA_UI_BASE_URL: ${env:CARTA_UI_BASE_URL}
         NONPERSONALIZED_SENDER_URL: ${env:NONPERSONALIZED_SENDER_URL}
         STAGE: ${opt:stage, "local"}
-        IS_LOCAL: ${env:IS_LOCAL}
+        IS_LOCAL: false
 
 functions:
     send:
