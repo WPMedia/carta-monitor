@@ -9,6 +9,20 @@ provider:
     runtime: nodejs14.x
     region: us-east-1
     lambdaHashingVersion: 20201221
+    environment:
+        NONPERSONALIZED_CAMPAIGN_ID: ${env:NONPERSONALIZED_CAMPAIGN_ID}
+        PERSONALIZED_CAMPAIGN_ID: ${env:PERSONALIZED_CAMPAIGN_ID}
+        TRANSACTIONAL_CAMPAIGN_ID: ${env:TRANSACTIONAL_CAMPAIGN_ID}
+        LIST_MANAGEMENT_SEND_ALERT: ${env:LIST_MANAGEMENT_SEND_ALERT}
+        ALERT_CAMPAIGN_NAME: ${env:ALERT_CAMPAIGN_NAME}
+        ALERT_EMAIL_LIST: ${env:ALERT_EMAIL_LIST}
+        OPS_GENIE_ENV: ${env:OPS_GENIE_ENV}
+        MONGODB_NAME: ${env:MONGODB_NAME}
+        MONGODB_URI: ${env:MONGODB_URI}
+        CARTA_UI_BASE_URL: ${env:CARTA_UI_BASE_URL}
+        NONPERSONALIZED_SENDER_URL: ${env:NONPERSONALIZED_SENDER_URL}
+        STAGE: ${opt:stage, "local"}
+        IS_LOCAL: ${env:IS_LOCAL}
 
 functions:
     send:
