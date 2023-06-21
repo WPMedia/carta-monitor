@@ -14,6 +14,8 @@ phases:
             - cd $CODEBUILD_SRC_DIR
             - echo "Updating npm (if available)..."
             - npm install -g npm
+            - export NPM_TOKEN=${NPM_TOKEN:-`aws ssm get-parameter --name "/carta/npm_token" --query Parameter.Value --output text`}
+            - echo "//registry.npmjs.org/:_authToken=${NPM_TOKEN}" > .npmrc
             - echo "Installing Serverless framework and other Node.js dependencies for project..."
             - npm install -g serverless
             - npm ci || npm install

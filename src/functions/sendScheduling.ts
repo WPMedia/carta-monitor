@@ -7,7 +7,10 @@ import { CartaAlerts } from "../alerts";
 import { Send } from "../mongo";
 import { environmentVariables } from "../environmentVariables";
 
-const createAndSendLetter = async (letterType: Send, campaignId: string) => {
+export const createAndSendLetter = async (
+    letterType: Send,
+    campaignId: string
+) => {
     const formattedDate = DateTime.fromJSDate(new Date()).toFormat(
         "yyyy-MM-dd HH:mm:ss"
     );

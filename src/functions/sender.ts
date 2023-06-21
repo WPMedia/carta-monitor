@@ -43,30 +43,26 @@ const sendEmail = async () => {
     );
 
     if (!response.ok) {
-        throw response;
+        throw new Error(
+            `Failed to send email: ${response.status} ${response.statusText}`
+        );
     }
 
     return (await response.json()) as SendResult;
 };
 
 export const sender = async () => {
-    let sendError: string;
     let result: SendResult;
 
     try {
         result = await sendEmail();
+        if ("error" in result || result.totalFailedSends > 0) {
+            throw new Error(JSON.stringify(result));
+        }
     } catch (error) {
-        sendError = error.message;
-    }
-
-    if (!sendError && ("error" in result || result.totalFailedSends > 0)) {
-        sendError = JSON.stringify(result);
-    }
-
-    if (sendError) {
         createAlert(
             CartaAlerts.Carta_Sender,
-            `Failed to send to carta-sender: ${sendError}`
+            `Failed to send to carta-sender: ${error.message}`
         );
         return;
     }
