@@ -87,6 +87,7 @@ async function isAlertCurrentlyOpen(alias: keyof typeof CartaAlerts) {
 }
 
 export async function closeOpenAlert(alias: keyof typeof CartaAlerts) {
+    console.log(`Successful check of ${alias}. Closing alert if it is open.`);
     const isOpen = await isAlertCurrentlyOpen(alias);
     if (!isOpen) {
         return;
