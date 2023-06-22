@@ -17,7 +17,7 @@ phases:
             - export NPM_TOKEN=${NPM_TOKEN:-`aws ssm get-parameter --name "/carta/npm_token" --query Parameter.Value --output text`}
             - echo "//registry.npmjs.org/:_authToken=${NPM_TOKEN}" > .npmrc
             - echo "Installing Serverless framework and other Node.js dependencies for project..."
-            - npm install -g serverless
+            - npm install -g serverless@^3.32.2
             - npm ci || npm install
 
     build:
