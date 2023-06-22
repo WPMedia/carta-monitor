@@ -32,6 +32,14 @@ provider:
                   Action:
                       - ssm:GetParameter
                   Resource: arn:aws:ssm:us-east-1:493801680065:parameter/*
+    vpc:
+        securityGroupIds:
+            - sg-0abacffd78082f584
+        subnetIds:
+            - subnet-0ea50fb1f64b90ee8
+            - subnet-0516dd60ee939324a
+            - subnet-05e1a7cfac1e3d068
+            - subnet-0ab03ec9b361377cf
 
 functions:
     send:
