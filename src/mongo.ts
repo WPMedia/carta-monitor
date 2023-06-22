@@ -22,7 +22,6 @@ export const getMongoDatabase = async (): Promise<{
         console.log("Using cached database instance");
         return Promise.resolve({ db: cachedDb, client: cachedClient });
     }
-    console.log("connecting to mongodb...");
     const ssmCache = await getSsmCache();
     const mongoConnectionStringPassword = ssmCache["mongodb.password"];
 
@@ -31,28 +30,14 @@ export const getMongoDatabase = async (): Promise<{
         mongoConnectionStringPassword
     );
 
-    console.log(`uri: ${mongoUri}`);
     const client = new MongoClient(mongoUri);
 
-    console.log("connecting... env is", environmentVariables.MONGODB_NAME);
-    console.log("About to connect to MongoDB...");
     try {
+        console.log(`Connecting to mongo with URI: ${mongoUri}`);
         await client.connect();
-        console.log("Successfully connected to MongoDB");
-    } catch (error) {
-        console.log("An error occurred while trying to connect to MongoDB");
-        console.error(error);
-    }
-
-    try {
-        console.log("called connect");
+        console.log("Successfully connected to mongo");
         cachedDb = client.db(environmentVariables.MONGODB_NAME);
-        console.log("set cachedb");
         cachedClient = client;
-        console.log(
-            "connected to mongo environment..." +
-                environmentVariables.MONGODB_NAME
-        );
         return { db: cachedDb, client: cachedClient };
     } catch (error) {
         console.error(
