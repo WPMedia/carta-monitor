@@ -40,8 +40,6 @@ provider:
         subnetIds:
             - subnet-0ea50fb1f64b90ee8
             - subnet-0516dd60ee939324a
-            - subnet-05e1a7cfac1e3d068
-            - subnet-0ab03ec9b361377cf
 
 functions:
     # send:
