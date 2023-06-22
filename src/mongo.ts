@@ -18,13 +18,12 @@ export const getMongoDatabase = async (): Promise<{
     db: Db;
     client: MongoClient;
 }> => {
-    console.log("Getting initial mongo database");
     if (cachedDb && cachedClient) {
         console.log("Using cached database instance");
         return Promise.resolve({ db: cachedDb, client: cachedClient });
     }
+    console.log("fetching ssm cache...");
     const ssmCache = await getSsmCache();
-    console.log("fetching ssm cache");
     const mongoConnectionStringPassword = ssmCache["mongodb.password"];
 
     const mongoUri = environmentVariables.MONGODB_URI.replace(
