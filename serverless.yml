@@ -9,6 +9,7 @@ provider:
     runtime: nodejs16.x
     region: us-east-1
     lambdaHashingVersion: 20201221
+    timeout: 120
     environment:
         NONPERSONALIZED_CAMPAIGN_ID: ${env:NONPERSONALIZED_CAMPAIGN_ID}
         PERSONALIZED_CAMPAIGN_ID: ${env:PERSONALIZED_CAMPAIGN_ID}
