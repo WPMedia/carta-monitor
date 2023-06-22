@@ -116,7 +116,7 @@ export const campaignSendAlerts = async () => {
     const { db, client } = await getMongoDatabase();
 
     const nlSend = db.collection<NewsletterSend>("nlSend");
-
+    console.log("connecting to collection");
     // nlSend records that have been scheduled to send in the last 24 hours
     // Ideally, we'd use scheduledSendTime, but that field is not indexed on nlSend,
     // and statusWaitTimestamp is indexed, and should be within a minute of statusWaitTimestamp
@@ -146,12 +146,16 @@ export const campaignSendAlerts = async () => {
             $and: [recentNlSendsQuery, sendStateNotDoneQuery, minSizeQuery]
         })
         .toArray();
-
+    console.log(
+        "newsletters to check for sends " +
+            eligibleRecentNewsletterSends.join(", ")
+    );
     const doneCampaignLetterIds: ObjectId[] = [];
     const warningCampaignLetterIds: ObjectId[] = [];
     const alarmCampaignLetterIds: ObjectId[] = [];
     eligibleRecentNewsletterSends.forEach((newsletterSend) => {
         const result = evaluateNewsletterSend(newsletterSend);
+        console.log("newsletter evaluations: " + result);
         if (result) {
             switch (result.state) {
                 case "done":

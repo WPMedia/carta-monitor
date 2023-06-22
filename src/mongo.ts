@@ -38,6 +38,10 @@ export const getMongoDatabase = async (): Promise<{
         await client.connect();
         cachedDb = client.db(environmentVariables.MONGODB_NAME);
         cachedClient = client;
+        console.log(
+            "connected to mongo environment..." +
+                environmentVariables.MONGODB_NAME
+        );
         return { db: cachedDb, client: cachedClient };
     } catch (error) {
         console.error(
