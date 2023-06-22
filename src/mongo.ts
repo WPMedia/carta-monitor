@@ -22,6 +22,7 @@ export const getMongoDatabase = async (): Promise<{
         console.log("Using cached database instance");
         return Promise.resolve({ db: cachedDb, client: cachedClient });
     }
+    console.log("connecting to mongodb...");
     const ssmCache = await getSsmCache();
     const mongoConnectionStringPassword = ssmCache["mongodb.password"];
 
@@ -30,6 +31,7 @@ export const getMongoDatabase = async (): Promise<{
         mongoConnectionStringPassword
     );
 
+    console.log(`uri: ${mongoUri}`);
     const client = new MongoClient(mongoUri);
 
     try {
