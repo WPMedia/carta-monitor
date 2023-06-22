@@ -36,10 +36,10 @@ provider:
     # https://www.letr.ai/blog/tech-221210
     vpc:
         securityGroupIds:
-            - sg-0abacffd78082f584
+            - sg-08cbbf0fdbaab202a
         subnetIds:
-            - subnet-0ea50fb1f64b90ee8
-            - subnet-0516dd60ee939324a
+            - subnet-0864b924787fed566
+            - subnet-04f2ccc1f8b0a4bbb
 
 functions:
     # send:
