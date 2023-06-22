@@ -34,9 +34,12 @@ export const getMongoDatabase = async (): Promise<{
     console.log(`uri: ${mongoUri}`);
     const client = new MongoClient(mongoUri);
 
+    console.log("connecting... env is", environmentVariables.MONGODB_NAME);
     try {
         await client.connect();
+        console.log("called connect");
         cachedDb = client.db(environmentVariables.MONGODB_NAME);
+        console.log("set cachedb");
         cachedClient = client;
         console.log(
             "connected to mongo environment..." +
