@@ -35,8 +35,16 @@ export const getMongoDatabase = async (): Promise<{
     const client = new MongoClient(mongoUri);
 
     console.log("connecting... env is", environmentVariables.MONGODB_NAME);
+    console.log("About to connect to MongoDB...");
     try {
         await client.connect();
+        console.log("Successfully connected to MongoDB");
+    } catch (error) {
+        console.log("An error occurred while trying to connect to MongoDB");
+        console.error(error);
+    }
+
+    try {
         console.log("called connect");
         cachedDb = client.db(environmentVariables.MONGODB_NAME);
         console.log("set cachedb");
