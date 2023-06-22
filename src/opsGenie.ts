@@ -54,6 +54,11 @@ export async function createAlert(
     }
 
     const { message, priority, description } = alertDetails[alias];
+
+    // If non-prod environment, only ever throw a P3
+    const environmentPriority =
+        environmentVariables.STAGE === "prod" ? priority : Priority.P3;
+
     const json = await makeOpsGenieRequest("", "POST", {
         message: `[${
             environmentVariables.OPS_GENIE_ENV.toLocaleUpperCase() ??
@@ -62,7 +67,7 @@ export async function createAlert(
         alias,
         description:
             description ?? customDescription ?? "No description provided",
-        priority
+        priority: environmentPriority
     });
     console.log(`Alert ${alias} created successfully: ${JSON.stringify(json)}`);
     return json;
