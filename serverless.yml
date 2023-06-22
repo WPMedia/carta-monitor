@@ -23,6 +23,14 @@ provider:
         NONPERSONALIZED_SENDER_URL: ${env:NONPERSONALIZED_SENDER_URL}
         STAGE: ${opt:stage, "local"}
         IS_LOCAL: false
+    iam:
+        role:
+            name: cartamonitor.ssm.read.${sls:stage}
+            statements:
+                - Effect: Allow
+                  Action:
+                      - ssm:GetParameter
+                  Resource: arn:aws:ssm:us-east-1:493801680065:parameter/*
 
 functions:
     send:
