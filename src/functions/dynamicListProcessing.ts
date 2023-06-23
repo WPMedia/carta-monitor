@@ -3,7 +3,6 @@ import { getMongoDatabase } from "../mongo";
 import { createAlert } from "../opsGenie";
 import { DateTime } from "luxon";
 import { CartaAlerts } from "../alerts";
-import { environmentVariables } from "../environmentVariables";
 
 type List = {
     name: string;

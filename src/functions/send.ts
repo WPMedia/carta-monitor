@@ -3,7 +3,6 @@ import { NewsletterSend } from "./campaignSendAlerts";
 import { findMostRecentSend, getMongoDatabase, Send } from "../mongo";
 import { DateTime } from "luxon";
 import { CartaAlerts } from "../alerts";
-import { environmentVariables } from "../environmentVariables";
 
 const alerts: Record<
     Send,

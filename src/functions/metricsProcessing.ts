@@ -1,5 +1,4 @@
 import { CartaAlerts } from "../alerts";
-import { environmentVariables } from "../environmentVariables";
 import { getMongoDatabase } from "../mongo";
 import { closeOpenAlert, createAlert } from "../opsGenie";
 
