@@ -202,6 +202,7 @@ export const campaignSendAlerts = async () => {
     // connections are managed differently, so we want to keep them open for possible reuse across multiple
     // invocations of the function for performance reasons.
     if (environmentVariables.IS_LOCAL) {
+        console.log("Closing connection to mongo...");
         await client.close();
     }
 };

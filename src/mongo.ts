@@ -19,9 +19,17 @@ export const getMongoDatabase = async (): Promise<{
     client: MongoClient;
 }> => {
     if (cachedDb && cachedClient) {
-        console.log("Using cached database instance");
-        cachedClient.connect();
-        return Promise.resolve({ db: cachedDb, client: cachedClient });
+        try {
+            // Attempt to use the cached client
+            await cachedClient.db().command({ ping: 1 });
+            return Promise.resolve({ db: cachedDb, client: cachedClient });
+        } catch (error) {
+            console.error(
+                `An error occurred while reusing MongoDB connection: ${error}`
+            );
+            console.log("Attempting to reconnect to MongoDB");
+            // Do not return, continue to recreate the connection
+        }
     }
     const ssmCache = await getSsmCache();
     const mongoConnectionStringPassword = ssmCache["mongodb.password"];
