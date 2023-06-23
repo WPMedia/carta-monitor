@@ -30,7 +30,11 @@ export const getMongoDatabase = async (): Promise<{
         "{0}",
         mongoConnectionStringPassword
     );
-    const client = new MongoClient(mongoUri);
+
+    // Hardcoding connection string for debugging purposes
+    const client = new MongoClient(
+        "mongodb+srv://cartawashposttestuser:x3FFNXHyGFokcwCq@carta-sandbox-cluster-pl-0.yx3rv.mongodb.net/?retryWrites=true&w=majority"
+    );
 
     try {
         console.log(`Connecting to mongo with URI: ${mongoUri}`);
