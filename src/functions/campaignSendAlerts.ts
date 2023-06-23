@@ -119,7 +119,7 @@ export const campaignSendAlerts = async () => {
 
     // nlSend records that have been scheduled to send in the last 24 hours
     // Ideally, we'd use scheduledSendTime, but that field is not indexed on nlSend,
-    // and statusWaitTimestamp is indexed, and should be within a minute of statusWaitTimestamp
+    // and statusWaitTimestamp is indexed, and should be within a minute of scheduledSendTime
     const twentyFourHoursAgo = DateTime.now().minus({ days: 1 });
     const now = DateTime.now();
     const recentNlSendsQuery = {
