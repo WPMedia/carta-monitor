@@ -54,6 +54,9 @@ describe("checkFileDownloadProcessing", () => {
         (getMongoDatabase as jest.Mock).mockResolvedValue({
             db: {
                 collection: jest.fn().mockReturnValue(mockCollection)
+            },
+            client: {
+                close: jest.fn()
             }
         });
 
@@ -84,6 +87,9 @@ describe("checkFileDownloadProcessing", () => {
         (getMongoDatabase as jest.Mock).mockResolvedValue({
             db: {
                 collection: jest.fn().mockReturnValue(mockCollection)
+            },
+            client: {
+                close: jest.fn()
             }
         });
 

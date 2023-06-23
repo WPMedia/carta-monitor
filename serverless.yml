@@ -24,7 +24,7 @@ provider:
         NONPERSONALIZED_SENDER_URL: ${env:NONPERSONALIZED_SENDER_URL}
         STAGE: ${opt:stage, "local"}
         IS_LOCAL: false
-        ENV: ${opt:stage}
+        ENV: ${opt:stage, "local"}
     iam:
         role:
             name: cartamonitor.ssm.read.${sls:stage}

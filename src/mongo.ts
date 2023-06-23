@@ -3,34 +3,10 @@ import { NewsletterSend } from "./functions/campaignSendAlerts";
 import { environmentVariables } from "./environmentVariables";
 import { getSsmCache } from "./ssm";
 
-// In AWS Lambda, variables declared outside of the function handler, like cachedDb and cachedClient,
-// are cached between function invocations for the lifetime of the container instance of the function.
-// AWS reuses the function container for a period of time, before disposing it.
-// During this period, these variables will maintain their values, making them effective for caching
-// purposes like reusing a database connection. However, keep in mind that AWS can dispose of the function
-// container at any time. So, we shouldn't rely on them for critical data or state.
-// https://aws.amazon.com/blogs/compute/caching-data-and-configuration-settings-with-aws-lambda-extensions/
-
-let cachedDb: Db;
-let cachedClient: MongoClient;
-
 export const getMongoDatabase = async (): Promise<{
     db: Db;
     client: MongoClient;
 }> => {
-    if (cachedDb && cachedClient) {
-        try {
-            // Attempt to use the cached client
-            await cachedClient.db().command({ ping: 1 });
-            return Promise.resolve({ db: cachedDb, client: cachedClient });
-        } catch (error) {
-            console.error(
-                `An error occurred while reusing MongoDB connection: ${error}`
-            );
-            console.log("Attempting to reconnect to MongoDB");
-            // Do not return, continue to recreate the connection
-        }
-    }
     const ssmCache = await getSsmCache();
     const mongoConnectionStringPassword = ssmCache["mongodb.password"];
 
@@ -41,12 +17,10 @@ export const getMongoDatabase = async (): Promise<{
     const client = new MongoClient(mongoUri);
 
     try {
-        console.log(`Connecting to mongo with URI: ${mongoUri}`);
         await client.connect();
         console.log("Successfully connected to mongo");
-        cachedDb = client.db(environmentVariables.MONGODB_NAME);
-        cachedClient = client;
-        return { db: cachedDb, client: cachedClient };
+        const db = client.db(environmentVariables.MONGODB_NAME);
+        return { db, client };
     } catch (error) {
         console.error(
             `An error occurred while connecting to MongoDB: ${error}`

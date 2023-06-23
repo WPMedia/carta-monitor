@@ -33,15 +33,7 @@ export const checkMetricsProcessing = async () => {
         console.error(`An error occurred while processing metrics: ${error}`);
     }
 
-    // If the function is running in a local environment (as specified by the IS_LOCAL environment variable),
-    // we close the MongoDB client connection after the function execution is complete. This is done because
-    // in a local environment (like when running tests or invoking the function manually), Node.js process
-    // won't exit as long as there are open connections. However, in a production environment (e.g., on AWS Lambda),
-    // connections are managed differently, so we want to keep them open for possible reuse across multiple
-    // invocations of the function for performance reasons.
-    if (environmentVariables.IS_LOCAL) {
-        await client.close();
-    }
+    await client.close();
 
     return {
         statusCode: 200,
