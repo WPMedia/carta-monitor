@@ -22,7 +22,6 @@ export const getMongoDatabase = async (): Promise<{
         console.log("Using cached database instance");
         return Promise.resolve({ db: cachedDb, client: cachedClient });
     }
-    console.log("fetching ssm cache...");
     const ssmCache = await getSsmCache();
     const mongoConnectionStringPassword = ssmCache["mongodb.password"];
 
@@ -30,12 +29,7 @@ export const getMongoDatabase = async (): Promise<{
         "{0}",
         mongoConnectionStringPassword
     );
-
-    // Hardcoding connection string for debugging purposes
-    const connectionString =
-        "mongodb+srv://cartawashposttestuser:x3FFNXHyGFokcwCq@carta-sandbox-cluster-pl-0.yx3rv.mongodb.net/?retryWrites=true&w=majority";
-    console.log(`Connecting to string ${connectionString}`);
-    const client = new MongoClient(connectionString);
+    const client = new MongoClient(mongoUri);
 
     try {
         console.log(`Connecting to mongo with URI: ${mongoUri}`);
