@@ -32,14 +32,23 @@ provider:
                   Action:
                       - ssm:GetParameter
                   Resource: arn:aws:ssm:us-east-1:493801680065:parameter/*
-    # VPC set up using this tutorial:
-    # https://www.letr.ai/blog/tech-221210
     vpc:
         securityGroupIds:
-            - sg-08cbbf0fdbaab202a
+            - "Fn::ImportValue": "vpc-${env:VPC}-VpcDefaultSecurityGroup"
         subnetIds:
-            - subnet-0864b924787fed566
-            - subnet-04f2ccc1f8b0a4bbb
+            - "Fn::Select":
+                  - 0
+                  - "Fn::Split":
+                        - ","
+                        - "Fn::ImportValue": "vpc-${env:VPC}-PrivateSubnetIds"
+    # # VPC set up using this tutorial:
+    # # https://www.letr.ai/blog/tech-221210
+    # vpc:
+    #     securityGroupIds:
+    #         - sg-08cbbf0fdbaab202a
+    #     subnetIds:
+    #         - subnet-0864b924787fed566
+    #         - subnet-04f2ccc1f8b0a4bbb
 
 functions:
     # send:
