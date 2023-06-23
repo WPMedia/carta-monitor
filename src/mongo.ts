@@ -20,6 +20,7 @@ export const getMongoDatabase = async (): Promise<{
 }> => {
     if (cachedDb && cachedClient) {
         console.log("Using cached database instance");
+        cachedClient.connect();
         return Promise.resolve({ db: cachedDb, client: cachedClient });
     }
     const ssmCache = await getSsmCache();
