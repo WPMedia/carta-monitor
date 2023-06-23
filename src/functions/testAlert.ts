@@ -59,4 +59,13 @@ export const testAlert = async () => {
         console.error(`Failed to send alert: ${error}`);
         await createAlert(CartaAlerts.Alert_Send);
     }
+
+    return {
+        statusCode: 200,
+        body: JSON.stringify("Success"),
+        headers: {
+            "Content-Type": "application/json",
+            "Access-Control-Allow-Origin": "*"
+        }
+    };
 };

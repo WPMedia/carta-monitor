@@ -42,4 +42,13 @@ export const checkFileDownloadProcessing = async () => {
             submittedDownloadList.length
         } file(s) currently processing: ${listNames.join(", ")}`
     );
+
+    return {
+        statusCode: 200,
+        body: JSON.stringify("Success"),
+        headers: {
+            "Content-Type": "application/json",
+            "Access-Control-Allow-Origin": "*"
+        }
+    };
 };

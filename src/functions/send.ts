@@ -82,4 +82,13 @@ export const send = async () => {
     );
 
     await client.close();
+
+    return {
+        statusCode: 200,
+        body: JSON.stringify("Success"),
+        headers: {
+            "Content-Type": "application/json",
+            "Access-Control-Allow-Origin": "*"
+        }
+    };
 };

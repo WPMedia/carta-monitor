@@ -68,4 +68,13 @@ export const sender = async () => {
     }
 
     closeOpenAlert(CartaAlerts.Carta_Sender);
+
+    return {
+        statusCode: 200,
+        body: JSON.stringify("Success"),
+        headers: {
+            "Content-Type": "application/json",
+            "Access-Control-Allow-Origin": "*"
+        }
+    };
 };
