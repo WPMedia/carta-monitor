@@ -34,6 +34,7 @@ export const getMongoDatabase = async (): Promise<{
     // Hardcoding connection string for debugging purposes
     const connectionString =
         "mongodb+srv://cartawashposttestuser:x3FFNXHyGFokcwCq@carta-sandbox-cluster-pl-0.yx3rv.mongodb.net/?retryWrites=true&w=majority";
+    console.log(`Connecting to string ${connectionString}`);
     const client = new MongoClient(connectionString);
 
     try {
