@@ -3,6 +3,7 @@
 ## Offline Testing
 
 ```
+. ./.envrc
 export VPC=local
 
 serverless invoke local --function sendScheduling
