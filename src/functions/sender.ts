@@ -2,7 +2,7 @@ import { closeOpenAlert, createAlert } from "../opsGenie";
 import { CartaAlerts } from "../alerts";
 import fetch from "cross-fetch";
 import { getSsmCache } from "../ssm";
-import { environmentVariables } from "../environmentVariables";
+import { envVars } from "../environmentVariables";
 
 const sendEvent = {
     subject:
@@ -30,17 +30,14 @@ const sendEmail = async () => {
     const ssmCache = await getSsmCache();
     const cartaSenderKey = ssmCache["carta.sender.endpoint.access.key"];
 
-    const response = await fetch(
-        environmentVariables.NONPERSONALIZED_SENDER_URL,
-        {
-            method: "POST",
-            headers: {
-                "x-api-key": cartaSenderKey,
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify(sendEvent)
-        }
-    );
+    const response = await fetch(envVars.NONPERSONALIZED_SENDER_URL, {
+        method: "POST",
+        headers: {
+            "x-api-key": cartaSenderKey,
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify(sendEvent)
+    });
 
     if (!response.ok) {
         throw new Error(
