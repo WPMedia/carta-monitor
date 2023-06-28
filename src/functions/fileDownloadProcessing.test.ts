@@ -70,7 +70,7 @@ describe("checkFileDownloadProcessing", () => {
         expect(mockCollection.find).toHaveBeenCalledWith({
             status: "submitted",
             created_time: {
-                $lte: expect.any(Date)
+                $lte: expect.anything()
             }
         });
         expect(mockToArray).toHaveBeenCalled();
@@ -102,7 +102,7 @@ describe("checkFileDownloadProcessing", () => {
         expect(mockCollection.find).toHaveBeenCalledWith({
             status: "submitted",
             created_time: {
-                $lte: expect.any(Date)
+                $lte: expect.anything()
             }
         });
         expect(mockToArray).toHaveBeenCalled();

@@ -5,7 +5,8 @@ import { checkMetricsProcessing } from "./metricsProcessing";
 jest.mock("../environmentVariables", () => ({
     environmentVariables: {
         MONGODB_URI: "mongodb://localhost:27017/{0}",
-        MONGODB_NAME: "test-db"
+        MONGODB_NAME: "test-db",
+        METRICS_EVENTS_COUNT_ALERT_THRESHHOLD: 20000000
     }
 }));
 
