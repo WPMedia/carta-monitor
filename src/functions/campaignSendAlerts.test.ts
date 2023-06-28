@@ -18,7 +18,11 @@ jest.mock("../opsGenie", () => ({
 }));
 
 jest.mock("../environmentVariables", () => ({
-    envVars: {}
+    envVars: {
+        SENDS_PER_ALLOWED_TIME_SEGMENT: 1000000,
+        MINUTES_PER_ALLOWED_TIME_SEGMENT: 30,
+        SUCCESSFUL_SEND_COMPLETION_PERCENTAGE: 0.9
+    }
 }));
 
 jest.mock("../ssm", () => ({

@@ -47,32 +47,22 @@ export const evaluateNewsletterSend = (
     if (attemptedSendCount > 0) {
         const sentPercentage = sentSuccessfulCount / attemptedSendCount;
 
-        // Configuration for send completion evaluation
-        const sendEvaluationConfig = {
-            sendsPerAllowedTimeSegment: 1000000, // For every 1,000,000 sends...
-            minutesPerAllowedTimeSegment: 30, // ...30 minutes are allowed...
-            successfulSendCompletionPercentage: 0.9 // ...for 90% of sends to complete
-        };
-
         // Calculate the allotted time for a P1 alert. For every segment of attempted sends (defined by the configuration),
         // add a segment's worth of minutes to the threshold.
         // If less than one segment has been attempted, the minimum threshold is one segment's worth of time.
         const segmentCount = Math.floor(
-            attemptedSendCount / sendEvaluationConfig.sendsPerAllowedTimeSegment
+            attemptedSendCount / +envVars.SENDS_PER_ALLOWED_TIME_SEGMENT
         );
         const allotedMinutesForP1Alert =
             (1 + Math.floor(segmentCount)) *
-            sendEvaluationConfig.minutesPerAllowedTimeSegment;
+            +envVars.MINUTES_PER_ALLOWED_TIME_SEGMENT;
 
         const additionalMinutesForP0Alert = 60;
         const allottedMinutesForP0Alert =
             allotedMinutesForP1Alert + additionalMinutesForP0Alert;
 
         let state: SendState;
-        if (
-            sentPercentage >=
-            sendEvaluationConfig.successfulSendCompletionPercentage
-        ) {
+        if (sentPercentage >= +envVars.SUCCESSFUL_SEND_COMPLETION_PERCENTAGE) {
             state = "done";
         } else if (minutesSinceScheduledSend > allottedMinutesForP0Alert) {
             state = "alarm";
