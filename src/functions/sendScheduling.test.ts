@@ -7,7 +7,7 @@ jest.mock("../cartaServer", () => ({
 }));
 
 jest.mock("../environmentVariables", () => ({
-    environmentVariables: {}
+    envVars: {}
 }));
 
 describe("createAndSendLetter function", () => {

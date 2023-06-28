@@ -1,6 +1,6 @@
 import fetch from "cross-fetch";
 import { CartaAlerts, Priority, alertDetails } from "./alerts";
-import { environmentVariables } from "./environmentVariables";
+import { envVars } from "./environmentVariables";
 import { getSsmCache } from "./ssm";
 
 type HttpMethod = "GET" | "POST" | "PUT" | "DELETE" | "PATCH" | "OPTIONS";
@@ -46,7 +46,7 @@ export async function createAlert(
     alias: keyof typeof CartaAlerts,
     customDescription?: string
 ) {
-    if (environmentVariables.IS_LOCAL) {
+    if (envVars.IS_LOCAL) {
         console.log(
             `Alert on local: ${JSON.stringify({ alias, customDescription })}`
         );
@@ -57,12 +57,11 @@ export async function createAlert(
 
     // If non-prod environment, only ever throw a P3
     const environmentPriority =
-        environmentVariables.STAGE === "prod" ? priority : Priority.P3;
+        envVars.STAGE === "prod" ? priority : Priority.P3;
 
     const json = await makeOpsGenieRequest("", "POST", {
         message: `[${
-            environmentVariables.OPS_GENIE_ENV.toLocaleUpperCase() ??
-            "Undefined"
+            envVars.OPS_GENIE_ENV.toLocaleUpperCase() ?? "Undefined"
         }] ${message}`,
         alias,
         description:

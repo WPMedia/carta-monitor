@@ -8,14 +8,14 @@ import { getMongoDatabase } from "../mongo";
 import { createAlert } from "../opsGenie";
 import { Collection, Db, Document, MongoClient } from "mongodb";
 import { CartaAlerts } from "../alerts";
-import { environmentVariables } from "../environmentVariables";
+import { envVars } from "../environmentVariables";
 
 jest.mock("../opsGenie", () => ({
     createAlert: jest.fn()
 }));
 
 jest.mock("../environmentVariables", () => ({
-    environmentVariables: {}
+    envVars: {}
 }));
 
 jest.mock("../ssm", () => ({
@@ -36,7 +36,7 @@ beforeAll(async () => {
     mongo = await MongoMemoryServer.create();
     const uri = mongo.getUri();
 
-    environmentVariables.MONGODB_URI = uri;
+    envVars.MONGODB_URI = uri;
 
     const connection = await getMongoDatabase();
     db = connection.db;

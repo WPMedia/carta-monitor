@@ -9,7 +9,7 @@ import { Collection, Db, MongoClient, ObjectId } from "mongodb";
 import { getMongoDatabase } from "../mongo";
 import { MongoMemoryServer } from "mongodb-memory-server";
 import { closeOpenAlert, createAlert, escalateAlert } from "../opsGenie";
-import { environmentVariables } from "../environmentVariables";
+import { envVars } from "../environmentVariables";
 
 jest.mock("../opsGenie", () => ({
     closeOpenAlert: jest.fn(),
@@ -18,7 +18,7 @@ jest.mock("../opsGenie", () => ({
 }));
 
 jest.mock("../environmentVariables", () => ({
-    environmentVariables: {}
+    envVars: {}
 }));
 
 jest.mock("../ssm", () => ({
@@ -40,7 +40,7 @@ beforeAll(async () => {
     mongo = await MongoMemoryServer.create();
     const uri = mongo.getUri();
 
-    environmentVariables.MONGODB_URI = uri;
+    envVars.MONGODB_URI = uri;
 
     const connection = await getMongoDatabase();
     db = connection.db;

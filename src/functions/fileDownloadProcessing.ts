@@ -2,12 +2,15 @@ import { DateTime } from "luxon";
 import { CartaAlerts } from "../alerts";
 import { getMongoDatabase } from "../mongo";
 import { closeOpenAlert, createAlert } from "../opsGenie";
+import { envVars } from "../environmentVariables";
 
 export const checkFileDownloadProcessing = async () => {
     const { db, client } = await getMongoDatabase();
     const fileDownloadCollection = db.collection("file_download_details");
 
-    const fifteenMinutesAgo = DateTime.local().minus({ minutes: 15 });
+    const fifteenMinutesAgo = DateTime.local().minus({
+        minutes: +envVars.FILE_DOWNLOAD_PROCESSING_THRESHHOLD_MINUTES
+    });
     const queryDoc = {
         status: "submitted",
         created_time: { $lte: fifteenMinutesAgo }

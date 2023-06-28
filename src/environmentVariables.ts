@@ -12,7 +12,8 @@ enum EnvVars {
     NONPERSONALIZED_SENDER_URL = "NONPERSONALIZED_SENDER_URL",
     STAGE = "STAGE",
     IS_LOCAL = "IS_LOCAL",
-    METRICS_EVENTS_COUNT_ALERT_THRESHHOLD = "METRICS_EVENTS_COUNT_ALERT_THRESHHOLD"
+    METRICS_EVENTS_COUNT_ALERT_THRESHHOLD = "METRICS_EVENTS_COUNT_ALERT_THRESHHOLD",
+    FILE_DOWNLOAD_PROCESSING_THRESHHOLD_MINUTES = "FILE_DOWNLOAD_PROCESSING_THRESHHOLD_MINUTES"
 }
 
 type EnvVarValues = { [K in EnvVars]: string };
@@ -37,4 +38,4 @@ const getAndCheckRequiredEnvVars = () => {
     return cache as EnvVarValues;
 };
 
-export const environmentVariables = getAndCheckRequiredEnvVars();
+export const envVars = getAndCheckRequiredEnvVars();

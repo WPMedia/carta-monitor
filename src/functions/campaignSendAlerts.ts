@@ -3,7 +3,7 @@ import { getMongoDatabase } from "../mongo";
 import { DateTime } from "luxon";
 import { closeOpenAlert, createAlert, escalateAlert } from "../opsGenie";
 import { CartaAlerts } from "../alerts";
-import { environmentVariables } from "../environmentVariables";
+import { envVars } from "../environmentVariables";
 
 export type NewsletterSend = {
     _id: ObjectId;
@@ -184,7 +184,7 @@ export const campaignSendAlerts = async () => {
         createAlert(
             CartaAlerts.Multiple_Campaign_Send_Delay,
             `<p><a href="${
-                environmentVariables.CARTA_UI_BASE_URL
+                envVars.CARTA_UI_BASE_URL
             }status">View</a> campaign send statuses on Carta</p>. Incomplete nlSend ids: "${warningCampaignLetterIds.join(
                 ", "
             )}"`

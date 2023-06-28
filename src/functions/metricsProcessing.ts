@@ -1,5 +1,5 @@
 import { CartaAlerts } from "../alerts";
-import { environmentVariables } from "../environmentVariables";
+import { envVars } from "../environmentVariables";
 import { getMongoDatabase } from "../mongo";
 import { closeOpenAlert, createAlert } from "../opsGenie";
 
@@ -10,10 +10,7 @@ export const checkMetricsProcessing = async () => {
     try {
         const eventsCount = await eventsCollection.estimatedDocumentCount();
 
-        if (
-            eventsCount <
-            +environmentVariables.METRICS_EVENTS_COUNT_ALERT_THRESHHOLD
-        ) {
+        if (eventsCount < +envVars.METRICS_EVENTS_COUNT_ALERT_THRESHHOLD) {
             await closeOpenAlert(
                 CartaAlerts.Metrics_Processing_Above_Threshshold
             );

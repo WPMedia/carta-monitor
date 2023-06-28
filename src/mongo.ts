@@ -1,6 +1,6 @@
 import { Collection, Db, MongoClient } from "mongodb";
 import { NewsletterSend } from "./functions/campaignSendAlerts";
-import { environmentVariables } from "./environmentVariables";
+import { envVars } from "./environmentVariables";
 import { getSsmCache } from "./ssm";
 
 export const getMongoDatabase = async (): Promise<{
@@ -10,7 +10,7 @@ export const getMongoDatabase = async (): Promise<{
     const ssmCache = await getSsmCache();
     const mongoConnectionStringPassword = ssmCache["mongodb.password"];
 
-    const mongoUri = environmentVariables.MONGODB_URI.replace(
+    const mongoUri = envVars.MONGODB_URI.replace(
         "{0}",
         mongoConnectionStringPassword
     );
@@ -19,7 +19,7 @@ export const getMongoDatabase = async (): Promise<{
     try {
         await client.connect();
         console.log("Successfully connected to mongo");
-        const db = client.db(environmentVariables.MONGODB_NAME);
+        const db = client.db(envVars.MONGODB_NAME);
         return { db, client };
     } catch (error) {
         console.error(

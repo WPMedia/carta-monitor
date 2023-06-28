@@ -26,7 +26,9 @@ jest.mock("../mongo", () => ({
 }));
 
 jest.mock("../environmentVariables", () => ({
-    environmentVariables: {}
+    envVars: {
+        FILE_DOWNLOAD_PROCESSING_THRESHHOLD_MINUTES: 15
+    }
 }));
 
 describe("checkFileDownloadProcessing", () => {
