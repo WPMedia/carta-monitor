@@ -52,7 +52,6 @@ export const findMostRecentSend = async (
 ) => {
     const filter = sendFilters[sendType];
 
-    // Query for the entry with queueTag:50000, personalized: true and the most recent statusDoneTimestamp
     const entry = await nlSendCollection
         .find(filter)
         .sort({ statusDoneTimestamp: -1 }) // Sort by statusDoneTimestamp in descending order

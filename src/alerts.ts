@@ -12,10 +12,13 @@ export const enum CartaAlerts {
     // Schedule alerts
     // These alerts check if there have been any 'send' events in the past 15 and 30 minutes for different types of sends.
     // If no activity is detected, an alert is triggered.
-    Schedule_Transactional_Send = "Schedule_Transactional_Send", // Failed to schedule a transactional send
-    Schedule_Personalized_Send = "Schedule_Personalized_Send", // Failed to send a personalized send
-    Schedule_Nonpersonalized_Send = "Schedule_Nonpersonalized_Send", // Failed to send a nonpersonalized send
-    Alert_Send = "Alert_Send", // Failed to send an alert send
+    // How to test: go to campaigns from .env (CAMPAIGN_ID's and ALERT_CAMPAIGN_NAME)
+    // and in Carta UI, do something that breaks the send
+    // such as remove Recipients from Recipients List, break template, etc.
+    Schedule_Transactional_Send = "Schedule_Transactional_Send",
+    Schedule_Personalized_Send = "Schedule_Personalized_Send",
+    Schedule_Nonpersonalized_Send = "Schedule_Nonpersonalized_Send",
+    Alert_Send = "Alert_Send",
 
     // No sends alerts
     // These alerts check if there have been no 'send' events in the past 15 and 30 minutes for different types of sends.
@@ -34,10 +37,12 @@ export const enum CartaAlerts {
 
     // Metrics alerts
     // These alerts check if the volume of documents in the 'events' collection exceeds a threshold.
+    // How to test: reduce METRICS_EVENTS_COUNT_ALERT_THRESHHOLD .env to something very low, then trigger metrics events to process
     Metrics_Processing_Above_Threshshold = "Metrics_Processing_Above_Threshshold", // Events collection is backed up
 
     // File download alerts
     // These alerts check for delayed processing of file downloads.
+    // How to test: reduce FILE_DOWNLOAD_PROCESSING_THRESHHOLD_MINUTES to a lower threshhold, then trigger a large file download
     File_Download_Processing_Delay = "File_Download_Processing_Delay", // File download processing is delayed more than 15 mins
 
     // Dynamic list alerts
@@ -51,7 +56,7 @@ export const enum CartaAlerts {
     Multiple_Campaign_Send_Delay = "Multiple_Campaign_Send_Delay", // Email send of multiple campaigns is delayed.
 
     // Carta-sender
-    Carta_Sender = "Carta_Sender" // Email sends failing in carta-sender
+    Carta_Sender = "Carta_Sender"
 }
 
 interface AlertDetails {
