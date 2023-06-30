@@ -3,29 +3,30 @@ import { NewsletterSend } from "./campaignSendAlerts";
 import { findMostRecentSend, getMongoDatabase, Send } from "../mongo";
 import { DateTime } from "luxon";
 import { CartaAlerts } from "../alerts";
+import { envVars } from "../environmentVariables";
 
 const alerts: Record<
     Send,
     {
-        fifteenAlert: keyof typeof CartaAlerts;
-        thirtyAlert: keyof typeof CartaAlerts;
+        p2Alert: keyof typeof CartaAlerts;
+        p1Alert: keyof typeof CartaAlerts;
     }
 > = {
     alert: {
-        fifteenAlert: CartaAlerts.No_Alerts_15_Minutes,
-        thirtyAlert: CartaAlerts.No_Alerts_30_Minutes
+        p2Alert: CartaAlerts.Alert_Send_Delay_P2,
+        p1Alert: CartaAlerts.Alert_Send_Delay_P1
     },
     transactional: {
-        fifteenAlert: CartaAlerts.No_Transactional_Sends_15_Minutes,
-        thirtyAlert: CartaAlerts.No_Transactional_Sends_30_Minutes
+        p2Alert: CartaAlerts.Transactional_Send_Delay_P2,
+        p1Alert: CartaAlerts.Transactional_Send_Delay_P1
     },
     personalized: {
-        fifteenAlert: CartaAlerts.No_Personalized_Sends_15_Minutes,
-        thirtyAlert: CartaAlerts.No_Personalized_Sends_30_Minutes
+        p2Alert: CartaAlerts.Personalized_Send_Delay_P2,
+        p1Alert: CartaAlerts.Personalized_Send_Delay_P1
     },
     nonpersonalized: {
-        fifteenAlert: CartaAlerts.No_NonpersonalizedSends_15_Minutes,
-        thirtyAlert: CartaAlerts.No_NonpersonalizedSends_30_Minutes
+        p2Alert: CartaAlerts.NonPersonalized_Send_Delay_P2,
+        p1Alert: CartaAlerts.NonPersonalized_Send_Delay_P1
     }
 };
 
@@ -36,12 +37,16 @@ const triggerAlert = async (
 ) => {
     const sendTime = DateTime.fromJSDate(mostRecentSend.statusDoneTimestamp);
     const utcNow = now.setZone("utc"); // convert to UTC to compare to UTC entry in mongo
-    const fifteenMinutesAgo = utcNow.minus({ minutes: 15 });
-    const thirtyMinutesAgo = utcNow.minus({ minutes: 30 });
-    if (sendTime > fifteenMinutesAgo) {
-        await closeOpenAlert(alerts[alert].thirtyAlert);
-        await closeOpenAlert(alerts[alert].fifteenAlert);
-    } else if (sendTime <= thirtyMinutesAgo) {
+    const p2AlertMinutes = utcNow.minus({
+        minutes: +envVars.SEND_DELAY_P2_MINUTES
+    });
+    const p1AlertMinutes = utcNow.minus({
+        minutes: +envVars.SEND_DELAY_P1_MINUTES
+    });
+    if (sendTime > p2AlertMinutes) {
+        await closeOpenAlert(alerts[alert].p1Alert);
+        await closeOpenAlert(alerts[alert].p2Alert);
+    } else if (sendTime <= p1AlertMinutes) {
         console.log(
             `Latest "${alert}" with id ${
                 mostRecentSend._id
@@ -49,8 +54,8 @@ const triggerAlert = async (
                 DateTime.DATETIME_SHORT
             )}, creating 30 minutes alert`
         );
-        await createAlert(alerts[alert].thirtyAlert);
-    } else if (sendTime <= fifteenMinutesAgo) {
+        await createAlert(alerts[alert].p1Alert);
+    } else if (sendTime <= p2AlertMinutes) {
         console.log(
             `Latest "${alert}" with id ${
                 mostRecentSend._id
@@ -58,7 +63,7 @@ const triggerAlert = async (
                 DateTime.DATETIME_SHORT
             )}, creating 15 minutes alert`
         );
-        await createAlert(alerts[alert].fifteenAlert);
+        await createAlert(alerts[alert].p2Alert);
     }
 };
 

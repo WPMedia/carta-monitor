@@ -21,19 +21,16 @@ export const enum CartaAlerts {
     Alert_Send = "Alert_Send",
 
     // No sends alerts
-    // These alerts check if there have been no 'send' events in the past 15 and 30 minutes for different types of sends.
+    // These alerts check if there have been no 'send' events in the past X and X + Y minutes for different types of sends.
     // If no sends are detected, an alert is triggered.
-    No_Transactional_Sends_15_Minutes = "No_Transactional_Sends_15_Minutes", // Viewers don’t receive transactional emails in the last 15 mins
-    No_Transactional_Sends_30_Minutes = "No_Transactional_Sends_30_Minutes", // Viewers don’t receive transactional emails in the last 30 mins
-
-    No_Personalized_Sends_15_Minutes = "No_Personalized_Sends_15_Minutes", // Viewers don’t receive personalized emails in the last 15 mins
-    No_Personalized_Sends_30_Minutes = "No_Personalized_Sends_30_Minutes", // Viewers don’t receive personalized emails in the last 30 mins
-
-    No_NonpersonalizedSends_15_Minutes = "No_NonpersonalizedSends_15_Minutes", // Viewers don’t receive nonpersonalized emails in the last 15 mins
-    No_NonpersonalizedSends_30_Minutes = "No_NonpersonalizedSends_30_Minutes", // Viewers don’t receive nonpersonalized emails in the last 30 mins
-
-    No_Alerts_15_Minutes = "No_Alerts_15_Minutes", // Viewers don’t receive alerts in the last 15 mins
-    No_Alerts_30_Minutes = "No_Alerts_30_Minutes", // Viewers don’t receive alerts in the last 30 mins
+    Transactional_Send_Delay_P2 = "Transactional_Send_Delay_P2",
+    Transactional_Send_Delay_P1 = "Transactional_Send_Delay_P1",
+    Personalized_Send_Delay_P2 = "Personalized_Send_Delay_P2",
+    Personalized_Send_Delay_P1 = "Personalized_Send_Delay_P1",
+    NonPersonalized_Send_Delay_P2 = "NonPersonalized_Send_Delay_P2",
+    NonPersonalized_Send_Delay_P1 = "NonPersonalized_Send_Delay_P1",
+    Alert_Send_Delay_P2 = "Alert_Send_Delay_P2",
+    Alert_Send_Delay_P1 = "Alert_Send_Delay_P1",
 
     // Metrics alerts
     // These alerts check if the volume of documents in the 'events' collection exceeds a threshold.
@@ -82,18 +79,18 @@ export const alertDetails: { [K in CartaAlerts]: AlertDetails } = {
         priority: Priority.P1,
         message: "Failed to send an alert send"
     },
-    [CartaAlerts.No_Transactional_Sends_15_Minutes]: {
+    [CartaAlerts.Transactional_Send_Delay_P2]: {
         priority: Priority.P2,
-        message: "Viewers don’t receive transactional emails in last 15 mins",
+        message: `Viewers don’t receive transactional emails in last ${envVars.SEND_DELAY_P2_MINUTES} mins`,
         description: `
         1. Check Transactional Campaign: ${envVars.TRANSACTIONAL_CAMPAIGN_ID}
         2. Check nlSend records with filter ${JSON.stringify(
             sendFilters["transactional"]
         )}, sorted by statusDoneTimestamp.`
     },
-    [CartaAlerts.No_Personalized_Sends_15_Minutes]: {
+    [CartaAlerts.Personalized_Send_Delay_P2]: {
         priority: Priority.P2,
-        message: "Viewers don’t receive personalized emails in last 15 mins",
+        message: `Viewers don’t receive personalized emails in last ${envVars.SEND_DELAY_P2_MINUTES} mins`,
         description: `
         1. Check Personalized Campaign: ${
             envVars.PERSONALIZED_CAMPAIGN_ID
@@ -102,9 +99,9 @@ export const alertDetails: { [K in CartaAlerts]: AlertDetails } = {
             sendFilters["personalized"]
         )}, sorted by statusDoneTimestamp`
     },
-    [CartaAlerts.No_NonpersonalizedSends_15_Minutes]: {
+    [CartaAlerts.NonPersonalized_Send_Delay_P2]: {
         priority: Priority.P2,
-        message: "Viewers don’t receive nonpersonalized emails in last 15 mins",
+        message: `Viewers don’t receive nonpersonalized emails in last ${envVars.SEND_DELAY_P2_MINUTES} mins`,
         description: `
         1. Check Nonpersonalized Campaign: ${
             envVars.NONPERSONALIZED_CAMPAIGN_ID
@@ -113,27 +110,27 @@ export const alertDetails: { [K in CartaAlerts]: AlertDetails } = {
             sendFilters["nonpersonalized"]
         )}, sorted by statusDoneTimestamp`
     },
-    [CartaAlerts.No_Alerts_15_Minutes]: {
+    [CartaAlerts.Alert_Send_Delay_P2]: {
         priority: Priority.P2,
-        message: "Viewers don’t receive alerts in last 15 mins",
+        message: `Viewers don’t receive alerts in last ${envVars.SEND_DELAY_P2_MINUTES} mins`,
         description: `
         1. Check Alert Campaign: ${envVars.ALERT_CAMPAIGN_NAME}
         2. Check nlSend records with filter ${JSON.stringify(
             sendFilters["alert"]
         )}, sorted by statusDoneTimestamp`
     },
-    [CartaAlerts.No_Transactional_Sends_30_Minutes]: {
+    [CartaAlerts.Transactional_Send_Delay_P1]: {
         priority: Priority.P1,
-        message: "Viewers don’t receive transactional emails in last 30 mins",
+        message: `Viewers don’t receive transactional emails in last ${envVars.SEND_DELAY_P1_MINUTES} mins`,
         description: `
         1. Check Transactional Campaign: ${envVars.TRANSACTIONAL_CAMPAIGN_ID}
         2. Check nlSend records with filter ${JSON.stringify(
             sendFilters["transactional"]
         )}, sorted by statusDoneTimestamp.`
     },
-    [CartaAlerts.No_Personalized_Sends_30_Minutes]: {
+    [CartaAlerts.Personalized_Send_Delay_P1]: {
         priority: Priority.P1,
-        message: "Viewers don’t receive personalized emails in last 30 mins",
+        message: `Viewers don’t receive personalized emails in last ${envVars.SEND_DELAY_P1_MINUTES} mins`,
         description: `
         1. Check Nonpersonalized Campaign: ${
             envVars.PERSONALIZED_CAMPAIGN_ID
@@ -142,9 +139,9 @@ export const alertDetails: { [K in CartaAlerts]: AlertDetails } = {
             sendFilters["personalized"]
         )}, sorted by statusDoneTimestamp`
     },
-    [CartaAlerts.No_NonpersonalizedSends_30_Minutes]: {
+    [CartaAlerts.NonPersonalized_Send_Delay_P1]: {
         priority: Priority.P1,
-        message: "Viewers don’t receive nonpersonalized emails in last 30 mins",
+        message: `Viewers don’t receive nonpersonalized emails in last ${envVars.SEND_DELAY_P1_MINUTES} mins`,
         description: `
         1. Check Nonpersonalized Campaign: ${
             envVars.NONPERSONALIZED_CAMPAIGN_ID
@@ -153,9 +150,9 @@ export const alertDetails: { [K in CartaAlerts]: AlertDetails } = {
             sendFilters["nonpersonalized"]
         )}, sorted by statusDoneTimestamp`
     },
-    [CartaAlerts.No_Alerts_30_Minutes]: {
+    [CartaAlerts.Alert_Send_Delay_P1]: {
         priority: Priority.P1,
-        message: "Viewers don’t receive alerts in last 30 mins",
+        message: `Viewers don’t receive alerts in last ${envVars.SEND_DELAY_P1_MINUTES} mins`,
         description: `
         1. Check Alert Campaign: ${envVars.ALERT_CAMPAIGN_NAME}
         2. Check nlSend records with filter ${JSON.stringify(

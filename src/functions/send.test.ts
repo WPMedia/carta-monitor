@@ -15,7 +15,10 @@ jest.mock("../opsGenie", () => ({
 }));
 
 jest.mock("../environmentVariables", () => ({
-    envVars: {}
+    envVars: {
+        SEND_DELAY_P2_MINUTES: 15,
+        SEND_DELAY_P1_MINUTES: 30
+    }
 }));
 
 jest.mock("../ssm", () => ({
@@ -84,10 +87,10 @@ describe("Checking that sends are occuring regularly", () => {
         await send();
 
         expect(closeOpenAlert).toHaveBeenCalledWith(
-            CartaAlerts.No_Transactional_Sends_15_Minutes
+            CartaAlerts.Transactional_Send_Delay_P2
         );
         expect(closeOpenAlert).toHaveBeenCalledWith(
-            CartaAlerts.No_Transactional_Sends_30_Minutes
+            CartaAlerts.Transactional_Send_Delay_P1
         );
     });
 
@@ -102,7 +105,7 @@ describe("Checking that sends are occuring regularly", () => {
         await send();
 
         expect(createAlert).toHaveBeenCalledWith(
-            CartaAlerts.No_Alerts_15_Minutes
+            CartaAlerts.Alert_Send_Delay_P2
         );
     });
 
@@ -117,7 +120,7 @@ describe("Checking that sends are occuring regularly", () => {
         await send();
 
         expect(createAlert).toHaveBeenCalledWith(
-            CartaAlerts.No_Personalized_Sends_30_Minutes
+            CartaAlerts.Personalized_Send_Delay_P1
         );
     });
 
@@ -151,13 +154,13 @@ describe("Checking that sends are occuring regularly", () => {
         await send();
 
         expect(createAlert).toHaveBeenCalledWith(
-            CartaAlerts.No_Personalized_Sends_30_Minutes
+            CartaAlerts.Personalized_Send_Delay_P1
         );
         expect(createAlert).toHaveBeenCalledWith(
-            CartaAlerts.No_NonpersonalizedSends_15_Minutes
+            CartaAlerts.NonPersonalized_Send_Delay_P2
         );
         expect(closeOpenAlert).toHaveBeenCalledWith(
-            CartaAlerts.No_Transactional_Sends_15_Minutes
+            CartaAlerts.Transactional_Send_Delay_P1
         );
     });
 });
