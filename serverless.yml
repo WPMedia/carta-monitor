@@ -99,7 +99,7 @@ functions:
         environment:
             STAGE: ${opt:stage, "local"}
         events:
-            - schedule: rate(10 minutes)
+            - schedule: rate(2 minutes)
 
     dynamicListProcessing:
         handler: src/functions/dynamicListProcessing.checkDynamicListProcessing
