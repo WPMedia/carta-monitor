@@ -80,4 +80,4 @@ export const baseSender = async () => {
 
 const handler = middy(baseSender).use(errorHandlerMiddleware());
 
-export { handler as send };
+export { handler as sender };
