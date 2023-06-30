@@ -13,8 +13,8 @@ export const enum CartaAlerts {
     // These alerts check if there have been any 'send' events in the past 15 and 30 minutes for different types of sends.
     // If no activity is detected, an alert is triggered.
     // How to test: go to campaigns from .env (CAMPAIGN_ID's and ALERT_CAMPAIGN_NAME)
-    // and in Carta UI, do something that breaks the send
-    // such as remove Recipients from Recipients List, break template, etc.
+    // and edit something that breaks the send
+    // such as remove Recipients from Recipients List, breaking template, etc.
     Schedule_Transactional_Send = "Schedule_Transactional_Send",
     Schedule_Personalized_Send = "Schedule_Personalized_Send",
     Schedule_Nonpersonalized_Send = "Schedule_Nonpersonalized_Send",
@@ -23,6 +23,7 @@ export const enum CartaAlerts {
     // No sends alerts
     // These alerts check if there have been no 'send' events in the past X and X + Y minutes for different types of sends.
     // If no sends are detected, an alert is triggered.
+    // How to test: reduce SEND_DELAY_P2_MINUTES and SEND_DELAY_P1_MINUTES to really low numbers
     Transactional_Send_Delay_P2 = "Transactional_Send_Delay_P2",
     Transactional_Send_Delay_P1 = "Transactional_Send_Delay_P1",
     Personalized_Send_Delay_P2 = "Personalized_Send_Delay_P2",
@@ -44,18 +45,22 @@ export const enum CartaAlerts {
 
     // Dynamic list alerts
     // These alerts check for processing delays in dynamic lists.
+    // How to test: TODO -- ask Jesse
     Automatic_Dynamic_List = "Automatic_Dynamic_List", // Auto-running dynamic list(s) failed to run
     Scheduled_Dynamic_List = "Scheduled_Dynamic_List", // Scheduled dynamic list(s) failed to run
 
     // Campaign send alerts
     // These alerts monitor the status of newsletter campaigns and update their send state.
     // They also trigger alerts and escalate the alert level based on the campaign status.
+    // How to test: reduce threshhold for send to be considered delay via SENDS_PER_ALLOWED_TIME_SEGMENT, MINUTES_PER_ALLOWED_TIME_SEGMENT, and SUCCESSFUL_SEND_COMPLETION_PERCENTAGE
     Multiple_Campaign_Send_Delay = "Multiple_Campaign_Send_Delay", // Email send of multiple campaigns is delayed.
 
     // Carta-sender
+    // How to test: pass invalid url to NONPERSONALIZED_SENDER_URL .env variable
     Carta_Sender = "Carta_Sender",
 
     // Unknown issue with monitor
+    // How to test: Any unhandled error
     Carta_Monitor_Error = "Carta_Monitor_Error"
 }
 
