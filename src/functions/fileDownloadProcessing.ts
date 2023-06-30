@@ -3,8 +3,10 @@ import { CartaAlerts } from "../alerts";
 import { getMongoDatabase } from "../mongo";
 import { closeOpenAlert, createAlert } from "../opsGenie";
 import { envVars } from "../environmentVariables";
+import middy from "@middy/core";
+import { errorHandlerMiddleware } from "../errorMiddleware";
 
-export const checkFileDownloadProcessing = async () => {
+export const baseCheckFileDownloadProcessing = async () => {
     const { db, client } = await getMongoDatabase();
     const fileDownloadCollection = db.collection("file_download_details");
 
@@ -56,3 +58,9 @@ export const checkFileDownloadProcessing = async () => {
         }
     };
 };
+
+const handler = middy(baseCheckFileDownloadProcessing).use(
+    errorHandlerMiddleware()
+);
+
+export { handler as checkFileDownloadProcessing };

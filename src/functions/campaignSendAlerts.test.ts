@@ -2,7 +2,7 @@ import { DateTime } from "luxon";
 import {
     NewsletterSend,
     SendState,
-    campaignSendAlerts,
+    baseCampaignSendAlerts,
     evaluateNewsletterSend
 } from "./campaignSendAlerts";
 import { Collection, Db, MongoClient, ObjectId } from "mongodb";
@@ -251,7 +251,7 @@ describe("Call alerts", () => {
             })
         ]);
 
-        await campaignSendAlerts();
+        await baseCampaignSendAlerts();
         expect(closeOpenAlert).toHaveBeenCalled();
 
         const sends = await nlSendCollection.find().toArray();
@@ -276,7 +276,7 @@ describe("Call alerts", () => {
             })
         ]);
 
-        await campaignSendAlerts();
+        await baseCampaignSendAlerts();
         expect(createAlert).toHaveBeenCalled();
 
         const sends = await nlSendCollection.find().toArray();
@@ -301,7 +301,7 @@ describe("Call alerts", () => {
             })
         ]);
 
-        await campaignSendAlerts();
+        await baseCampaignSendAlerts();
         expect(escalateAlert).toHaveBeenCalled();
 
         const sends = await nlSendCollection.find().toArray();

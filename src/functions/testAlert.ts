@@ -3,8 +3,10 @@ import { closeOpenAlert, createAlert } from "../opsGenie";
 import fetch from "cross-fetch"; // Using node-fetch for compatibility with Node.js
 import { CartaAlerts } from "../alerts";
 import { envVars } from "../environmentVariables";
+import { errorHandlerMiddleware } from "../errorMiddleware";
+import middy from "@middy/core";
 
-export const testAlert = async () => {
+export const baseTestAlert = async () => {
     try {
         // Alert send via list management
         const ssmClient = new SSMClient({
@@ -67,3 +69,7 @@ export const testAlert = async () => {
         }
     };
 };
+
+const handler = middy(baseTestAlert).use(errorHandlerMiddleware());
+
+export { handler as testAlert };

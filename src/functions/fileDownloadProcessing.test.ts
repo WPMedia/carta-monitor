@@ -1,5 +1,5 @@
 import { closeOpenAlert, createAlert } from "../opsGenie";
-import { checkFileDownloadProcessing } from "./fileDownloadProcessing";
+import { baseCheckFileDownloadProcessing } from "./fileDownloadProcessing";
 import { getMongoDatabase } from "../mongo";
 import { CartaAlerts } from "../alerts";
 
@@ -62,7 +62,7 @@ describe("checkFileDownloadProcessing", () => {
             }
         });
 
-        await checkFileDownloadProcessing();
+        await baseCheckFileDownloadProcessing();
 
         expect(createAlert).toHaveBeenCalledWith(
             CartaAlerts.File_Download_Processing_Delay,
@@ -95,7 +95,7 @@ describe("checkFileDownloadProcessing", () => {
             }
         });
 
-        await checkFileDownloadProcessing();
+        await baseCheckFileDownloadProcessing();
 
         expect(closeOpenAlert).toHaveBeenCalledWith(
             CartaAlerts.File_Download_Processing_Delay

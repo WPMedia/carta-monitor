@@ -53,7 +53,10 @@ export const enum CartaAlerts {
     Multiple_Campaign_Send_Delay = "Multiple_Campaign_Send_Delay", // Email send of multiple campaigns is delayed.
 
     // Carta-sender
-    Carta_Sender = "Carta_Sender"
+    Carta_Sender = "Carta_Sender",
+
+    // Unknown issue with monitor
+    Carta_Monitor_Error = "Carta_Monitor_Error"
 }
 
 interface AlertDetails {
@@ -184,5 +187,9 @@ export const alertDetails: { [K in CartaAlerts]: AlertDetails } = {
     [CartaAlerts.Carta_Sender]: {
         priority: Priority.P1,
         message: "Carta-sender returning failed response"
+    },
+    [CartaAlerts.Carta_Monitor_Error]: {
+        priority: Priority.P3,
+        message: "Carta-monitor threw an unexpected error"
     }
 };

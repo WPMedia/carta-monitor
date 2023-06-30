@@ -4,6 +4,8 @@ import { findMostRecentSend, getMongoDatabase, Send } from "../mongo";
 import { DateTime } from "luxon";
 import { CartaAlerts } from "../alerts";
 import { envVars } from "../environmentVariables";
+import middy from "@middy/core";
+import { errorHandlerMiddleware } from "../errorMiddleware";
 
 const alerts: Record<
     Send,
@@ -67,7 +69,7 @@ const triggerAlert = async (
     }
 };
 
-export const send = async () => {
+export const baseSend = async () => {
     const { db, client } = await getMongoDatabase();
     const nlSendCollection = db.collection<NewsletterSend>("nlSend");
 
@@ -96,3 +98,7 @@ export const send = async () => {
         }
     };
 };
+
+const handler = middy(baseSend).use(errorHandlerMiddleware());
+
+export { handler as send };

@@ -3,6 +3,8 @@ import { CartaAlerts } from "../alerts";
 import fetch from "cross-fetch";
 import { getSsmCache } from "../ssm";
 import { envVars } from "../environmentVariables";
+import middy from "@middy/core";
+import { errorHandlerMiddleware } from "../errorMiddleware";
 
 const sendEvent = {
     subject:
@@ -48,7 +50,7 @@ const sendEmail = async () => {
     return (await response.json()) as SendResult;
 };
 
-export const sender = async () => {
+export const baseSender = async () => {
     let result: SendResult;
 
     try {
@@ -75,3 +77,7 @@ export const sender = async () => {
         }
     };
 };
+
+const handler = middy(baseSender).use(errorHandlerMiddleware());
+
+export { handler as send };

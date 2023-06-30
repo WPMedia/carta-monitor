@@ -4,7 +4,7 @@ import { Collection, Db, MongoClient, ObjectId } from "mongodb";
 import { getMongoDatabase, sendFilters } from "../mongo";
 import { MongoMemoryServer } from "mongodb-memory-server";
 import { closeOpenAlert, createAlert } from "../opsGenie";
-import { send } from "./send";
+import { baseSend } from "./send";
 import { CartaAlerts } from "../alerts";
 import { envVars } from "../environmentVariables";
 
@@ -84,7 +84,7 @@ describe("Checking that sends are occuring regularly", () => {
         };
         await nlSendCollection.insertOne(recentSend);
 
-        await send();
+        await baseSend();
 
         expect(closeOpenAlert).toHaveBeenCalledWith(
             CartaAlerts.Transactional_Send_Delay_P2
@@ -102,7 +102,7 @@ describe("Checking that sends are occuring regularly", () => {
         };
         await nlSendCollection.insertOne(oldSend);
 
-        await send();
+        await baseSend();
 
         expect(createAlert).toHaveBeenCalledWith(
             CartaAlerts.Alert_Send_Delay_P2
@@ -117,7 +117,7 @@ describe("Checking that sends are occuring regularly", () => {
         };
         await nlSendCollection.insertOne(oldSend);
 
-        await send();
+        await baseSend();
 
         expect(createAlert).toHaveBeenCalledWith(
             CartaAlerts.Personalized_Send_Delay_P1
@@ -151,7 +151,7 @@ describe("Checking that sends are occuring regularly", () => {
             recentAlertSend
         ]);
 
-        await send();
+        await baseSend();
 
         expect(createAlert).toHaveBeenCalledWith(
             CartaAlerts.Personalized_Send_Delay_P1

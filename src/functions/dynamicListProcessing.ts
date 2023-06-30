@@ -3,6 +3,8 @@ import { getMongoDatabase } from "../mongo";
 import { createAlert } from "../opsGenie";
 import { DateTime } from "luxon";
 import { CartaAlerts } from "../alerts";
+import middy from "@middy/core";
+import { errorHandlerMiddleware } from "../errorMiddleware";
 
 type List = {
     name: string;
@@ -98,7 +100,7 @@ const calculateQueryWindows = (now: DateTime) => {
     };
 };
 
-export const checkDynamicListProcessing = async () => {
+export const baseCheckDynamicListProcessing = async () => {
     const { db, client } = await getMongoDatabase();
     const { endWindowIso, startWindowIso, endWindowHHmm, startWindowHHmm } =
         calculateQueryWindows(DateTime.local());
@@ -152,3 +154,9 @@ export const checkDynamicListProcessing = async () => {
         }
     };
 };
+
+const handler = middy(baseCheckDynamicListProcessing).use(
+    errorHandlerMiddleware()
+);
+
+export { handler as checkDynamicListProcessing };

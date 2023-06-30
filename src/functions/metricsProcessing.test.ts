@@ -1,6 +1,6 @@
 import { CartaAlerts } from "../alerts";
 import { closeOpenAlert, createAlert } from "../opsGenie";
-import { checkMetricsProcessing } from "./metricsProcessing";
+import { baseCheckMetricsProcessing } from "./metricsProcessing";
 
 jest.mock("../environmentVariables", () => ({
     envVars: {
@@ -45,7 +45,7 @@ jest.mock("mongodb", () => {
     };
 });
 
-describe("checkMetricsProcessing", () => {
+describe("baseCheckMetricsProcessing", () => {
     beforeEach(() => {
         // Reset all mocks before each test
         jest.clearAllMocks();
@@ -65,7 +65,7 @@ describe("checkMetricsProcessing", () => {
     test("calls createAlert when estimatedDocumentCount is above the threshold", async () => {
         mockEstimatedDocumentCount.mockResolvedValue(20000001); // Above threshold
 
-        await checkMetricsProcessing();
+        await baseCheckMetricsProcessing();
 
         expect(createAlert).toHaveBeenCalledWith(
             CartaAlerts.Metrics_Processing_Above_Threshshold
@@ -76,7 +76,7 @@ describe("checkMetricsProcessing", () => {
     test("calls closeAlert when estimatedDocumentCount is below the threshold", async () => {
         mockEstimatedDocumentCount.mockResolvedValue(19999999); // Below threshold
 
-        await checkMetricsProcessing();
+        await baseCheckMetricsProcessing();
 
         expect(closeOpenAlert).toHaveBeenCalledWith(
             CartaAlerts.Metrics_Processing_Above_Threshshold

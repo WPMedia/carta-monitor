@@ -6,6 +6,8 @@ import { getCartaServer } from "../cartaServer";
 import { CartaAlerts } from "../alerts";
 import { Send } from "../mongo";
 import { envVars } from "../environmentVariables";
+import middy from "@middy/core";
+import { errorHandlerMiddleware } from "../errorMiddleware";
 
 export const createAndSendLetter = async (
     letterType: Send,
@@ -39,7 +41,7 @@ export const createAndSendLetter = async (
     console.log(`Scheduled send for ${letterType} letter ${letterId}`);
 };
 
-export const sendScheduling = async () => {
+export const baseSendScheduling = async () => {
     const sends: {
         letterType: Send;
         alertType: CartaAlerts;
@@ -88,3 +90,7 @@ export const sendScheduling = async () => {
         }
     };
 };
+
+const handler = middy(baseSendScheduling).use(errorHandlerMiddleware());
+
+export { handler as sendScheduling };

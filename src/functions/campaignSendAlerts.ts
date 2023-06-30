@@ -4,6 +4,8 @@ import { DateTime } from "luxon";
 import { closeOpenAlert, createAlert, escalateAlert } from "../opsGenie";
 import { CartaAlerts } from "../alerts";
 import { envVars } from "../environmentVariables";
+import middy from "@middy/core";
+import { errorHandlerMiddleware } from "../errorMiddleware";
 
 export type NewsletterSend = {
     _id: ObjectId;
@@ -102,7 +104,7 @@ export const updateSendState = async (
     }
 };
 
-export const campaignSendAlerts = async () => {
+export const baseCampaignSendAlerts = async () => {
     const { db, client } = await getMongoDatabase();
 
     const nlSend = db.collection<NewsletterSend>("nlSend");
@@ -196,3 +198,7 @@ export const campaignSendAlerts = async () => {
         }
     };
 };
+
+const handler = middy(baseCampaignSendAlerts).use(errorHandlerMiddleware());
+
+export { handler as campaignSendAlerts };

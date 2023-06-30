@@ -1,6 +1,6 @@
 import { DateTime, Settings } from "luxon";
 import {
-    checkDynamicListProcessing,
+    baseCheckDynamicListProcessing,
     getMostRecentQuarterHour
 } from "./dynamicListProcessing";
 import { MongoMemoryServer } from "mongodb-memory-server";
@@ -131,7 +131,7 @@ describe("checkDynamicListProcessing", () => {
             }
         ]);
 
-        await checkDynamicListProcessing();
+        await baseCheckDynamicListProcessing();
 
         const processedLists = await lmListsCollection.countDocuments();
         expect(processedLists).toBe(2);
@@ -151,7 +151,7 @@ describe("checkDynamicListProcessing", () => {
             autorun_time: ""
         });
 
-        await checkDynamicListProcessing();
+        await baseCheckDynamicListProcessing();
 
         expect(createAlert).toHaveBeenCalledWith(
             CartaAlerts.Automatic_Dynamic_List,
@@ -177,7 +177,7 @@ describe("checkDynamicListProcessing", () => {
             autorun_time: triggerWindow.toFormat("HHmm")
         });
 
-        await checkDynamicListProcessing();
+        await baseCheckDynamicListProcessing();
 
         expect(createAlert).toHaveBeenCalledWith(
             CartaAlerts.Scheduled_Dynamic_List,
