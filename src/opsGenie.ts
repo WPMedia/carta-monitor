@@ -46,7 +46,7 @@ export async function createAlert(
     alias: keyof typeof CartaAlerts,
     customDescription?: string
 ) {
-    if (envVars.IS_LOCAL) {
+    if (envVars.IS_LOCAL === "true") {
         console.log(
             `Alert on local: ${JSON.stringify({ alias, customDescription })}`
         );
