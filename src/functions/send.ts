@@ -54,7 +54,7 @@ const triggerAlert = async (
                 mostRecentSend._id
             } sent at ${sendTime.toLocaleString(
                 DateTime.DATETIME_SHORT
-            )}, creating 30 minutes alert`
+            )}, creating ${envVars.SEND_DELAY_P2_MINUTES} minutes alert`
         );
         await createAlert(alerts[alert].p1Alert);
     } else if (sendTime <= p2AlertMinutes) {
@@ -63,7 +63,7 @@ const triggerAlert = async (
                 mostRecentSend._id
             } sent at ${sendTime.toLocaleString(
                 DateTime.DATETIME_SHORT
-            )}, creating 15 minutes alert`
+            )}, creating ${envVars.SEND_DELAY_P1_MINUTES} minutes alert`
         );
         await createAlert(alerts[alert].p2Alert);
     }
