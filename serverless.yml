@@ -58,61 +58,61 @@ functions:
         description: "Monitors and alerts for 'send' activities. Checks recent send events and triggers alerts for different types of sends."
         environment:
             STAGE: ${opt:stage, "local"}
-        events:
-            - schedule: rate(10 minutes)
+        # events:
+        #     - schedule: rate(10 minutes)
 
     sendScheduling:
         handler: src/functions/sendScheduling.sendScheduling
         description: "Manages scheduling of 'send' activities for various letter types. Creates and schedules letters, triggers alerts if scheduling fails."
         environment:
             STAGE: ${opt:stage, "local"}
-        events:
-            - schedule: rate(10 minutes)
+        # events:
+        #     - schedule: rate(10 minutes)
 
     sender:
         handler: src/functions/sender.sender
         description: "Healthcheck to ensure carta-sender invocation is successful."
         environment:
             STAGE: ${opt:stage, "local"}
-        events:
-            - schedule: rate(10 minutes)
+        # events:
+        #     - schedule: rate(10 minutes)
 
     testAlert:
         handler: src/functions/testAlert.testAlert
         description: "Tests the alert mechanism by sending an alert via the list management service."
         environment:
             STAGE: ${opt:stage, "local"}
-        events:
-            - schedule: rate(10 minutes)
+        # events:
+        #     - schedule: rate(10 minutes)
 
     metricsProcessing:
         handler: src/functions/metricsProcessing.checkMetricsProcessing
         description: "Checks volume of documents in the 'events' collection to ensure metrics processing load remains within acceptable limits."
         environment:
             STAGE: ${opt:stage, "local"}
-        events:
-            - schedule: rate(10 minutes)
+        # events:
+        #     - schedule: rate(10 minutes)
 
     fileDownloadProcessing:
         handler: src/functions/fileDownloadProcessing.checkFileDownloadProcessing
         description: "Inspects 'file_download_details' collection for delayed file downloads and triggers alerts."
         environment:
             STAGE: ${opt:stage, "local"}
-        events:
-            - schedule: rate(10 minutes)
+        # events:
+        #     - schedule: rate(10 minutes)
 
     dynamicListProcessing:
         handler: src/functions/dynamicListProcessing.checkDynamicListProcessing
         description: "Checks for processing delays in dynamic lists and triggers alerts if lists fail to run as expected."
         environment:
             STAGE: ${opt:stage, "local"}
-        events:
-            - schedule: rate(10 minutes)
+        # events:
+        #     - schedule: rate(10 minutes)
 
     campaignSendAlerts:
         handler: src/functions/campaignSendAlerts.campaignSendAlerts
         description: "Monitors and updates the status of newsletter campaigns, triggers alerts for delayed or incomplete sends."
         environment:
             STAGE: ${opt:stage, "local"}
-        events:
-            - schedule: rate(10 minutes)
+        # events:
+        #     - schedule: rate(10 minutes)
