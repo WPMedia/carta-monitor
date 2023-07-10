@@ -6,7 +6,7 @@
         "lint": "eslint . && prettier --check .",
         "lint:fix": "eslint --fix . && prettier --write .",
         "prepare": "husky install",
-        "test": "jest --silent"
+        "test": "jest -o --silent"
     },
     "repository": {
         "type": "git",
