@@ -114,15 +114,23 @@ export async function escalateAlert(
     alias: keyof typeof CartaAlerts,
     newPriority: keyof typeof Priority
 ) {
+    let environmentPriority = newPriority;
+    if (envVars.STAGE !== "prod" && newPriority !== Priority.P3) {
+        console.log(
+            `Since this isn't the prod environment, lowering priority from ${newPriority} to ${Priority.P3}`
+        );
+        environmentPriority = Priority.P3;
+    }
+
     const json = await makeOpsGenieRequest(
         `${alias}?identifierType=alias`,
         "PATCH",
         {
-            priority: newPriority
+            priority: environmentPriority
         }
     );
     console.log(
-        `Alert ${alias} escalated successfully to ${newPriority}: ${JSON.stringify(
+        `Alert ${alias} escalated successfully to ${environmentPriority}: ${JSON.stringify(
             json
         )}`
     );
