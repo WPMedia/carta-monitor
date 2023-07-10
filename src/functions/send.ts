@@ -39,7 +39,7 @@ const triggerAlert = async (
                 mostRecentSend._id
             } sent at ${sendTime.toLocaleString(
                 DateTime.DATETIME_SHORT
-            )}, creating ${envVars.SEND_DELAY_P1_MINUTES} minutes alert`
+            )}, creating ${envVars.SEND_DELAY_P2_MINUTES} minutes alert`
         );
         await createAlert(alerts[alert]);
     }
@@ -50,7 +50,7 @@ const triggerAlert = async (
                 mostRecentSend._id
             } sent at ${sendTime.toLocaleString(
                 DateTime.DATETIME_SHORT
-            )}, creating ${envVars.SEND_DELAY_P2_MINUTES} minutes alert`
+            )}, escalating alert`
         );
         await escalateAlert(alerts[alert], Priority.P1);
     }
