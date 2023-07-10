@@ -55,9 +55,14 @@ export async function createAlert(
 
     const { message, priority, description } = alertDetails[alias];
 
-    // If non-prod environment, only ever throw a P3
-    const environmentPriority =
-        envVars.STAGE === "prod" ? priority : Priority.P3;
+    let environmentPriority = priority;
+
+    if (envVars.STAGE !== "prod" && priority !== Priority.P3) {
+        console.log(
+            `Since this isn't the prod environment, lowering priority from ${priority} to ${Priority.P3}`
+        );
+        environmentPriority = Priority.P3;
+    }
 
     const json = await makeOpsGenieRequest("", "POST", {
         message: `[${
