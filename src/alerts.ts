@@ -92,7 +92,9 @@ export const alertDetails: { [K in CartaAlerts]: AlertDetails } = {
             sendFilters["transactional"]
         )}, sorted by statusDoneTimestamp.
         
-        Note: Will escalate to P1 after ${envVars.SEND_DELAY_P1_MINUTES}`
+        Note: Will escalate to P1 after ${
+            envVars.SEND_DELAY_P1_MINUTES
+        } minutes`
     },
     [CartaAlerts.Personalized_Send_Delay]: {
         priority: Priority.P2,
@@ -105,7 +107,9 @@ export const alertDetails: { [K in CartaAlerts]: AlertDetails } = {
             sendFilters["personalized"]
         )}, sorted by statusDoneTimestamp
         
-        Note: Will escalate to P1 after ${envVars.SEND_DELAY_P1_MINUTES}`
+        Note: Will escalate to P1 after ${
+            envVars.SEND_DELAY_P1_MINUTES
+        } minutes`
     },
     [CartaAlerts.NonPersonalized_Send_Delay]: {
         priority: Priority.P2,
@@ -118,7 +122,9 @@ export const alertDetails: { [K in CartaAlerts]: AlertDetails } = {
             sendFilters["nonpersonalized"]
         )}, sorted by statusDoneTimestamp
         
-        Note: Will escalate to P1 after ${envVars.SEND_DELAY_P1_MINUTES}`
+        Note: Will escalate to P1 after ${
+            envVars.SEND_DELAY_P1_MINUTES
+        } minutes`
     },
     [CartaAlerts.Alert_Send_Delay]: {
         priority: Priority.P2,
@@ -129,7 +135,9 @@ export const alertDetails: { [K in CartaAlerts]: AlertDetails } = {
             sendFilters["alert"]
         )}, sorted by statusDoneTimestamp
         
-        Note: Will escalate to P1 after ${envVars.SEND_DELAY_P1_MINUTES}`
+        Note: Will escalate to P1 after ${
+            envVars.SEND_DELAY_P1_MINUTES
+        } minutes`
     },
     [CartaAlerts.Metrics_Processing_Above_Threshshold]: {
         priority: Priority.P2,
