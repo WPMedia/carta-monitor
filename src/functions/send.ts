@@ -1,35 +1,17 @@
-import { closeOpenAlert, createAlert } from "../opsGenie";
+import { closeOpenAlert, createAlert, escalateAlert } from "../opsGenie";
 import { NewsletterSend } from "./campaignSendAlerts";
-import { findMostRecentSend, getMongoDatabase, Send } from "../mongo";
+import { Send, findMostRecentSend, getMongoDatabase } from "../mongo";
 import { DateTime } from "luxon";
-import { CartaAlerts } from "../alerts";
+import { CartaAlerts, Priority } from "../alerts";
 import { envVars } from "../environmentVariables";
 import middy from "@middy/core";
 import { errorHandlerMiddleware } from "../errorMiddleware";
 
-const alerts: Record<
-    Send,
-    {
-        p2Alert: keyof typeof CartaAlerts;
-        p1Alert: keyof typeof CartaAlerts;
-    }
-> = {
-    alert: {
-        p2Alert: CartaAlerts.Alert_Send_Delay_P2,
-        p1Alert: CartaAlerts.Alert_Send_Delay_P1
-    },
-    transactional: {
-        p2Alert: CartaAlerts.Transactional_Send_Delay_P2,
-        p1Alert: CartaAlerts.Transactional_Send_Delay_P1
-    },
-    personalized: {
-        p2Alert: CartaAlerts.Personalized_Send_Delay_P2,
-        p1Alert: CartaAlerts.Personalized_Send_Delay_P1
-    },
-    nonpersonalized: {
-        p2Alert: CartaAlerts.NonPersonalized_Send_Delay_P2,
-        p1Alert: CartaAlerts.NonPersonalized_Send_Delay_P1
-    }
+const alerts: Record<Send, CartaAlerts> = {
+    alert: CartaAlerts.Alert_Send_Delay,
+    transactional: CartaAlerts.Transactional_Send_Delay,
+    personalized: CartaAlerts.Personalized_Send_Delay,
+    nonpersonalized: CartaAlerts.NonPersonalized_Send_Delay
 };
 
 const triggerAlert = async (
@@ -45,19 +27,13 @@ const triggerAlert = async (
     const p1AlertMinutes = utcNow.minus({
         minutes: +envVars.SEND_DELAY_P1_MINUTES
     });
+
     if (sendTime > p2AlertMinutes) {
-        await closeOpenAlert(alerts[alert].p1Alert);
-        await closeOpenAlert(alerts[alert].p2Alert);
-    } else if (sendTime <= p1AlertMinutes) {
-        console.log(
-            `Latest "${alert}" with id ${
-                mostRecentSend._id
-            } sent at ${sendTime.toLocaleString(
-                DateTime.DATETIME_SHORT
-            )}, creating ${envVars.SEND_DELAY_P2_MINUTES} minutes alert`
-        );
-        await createAlert(alerts[alert].p1Alert);
-    } else if (sendTime <= p2AlertMinutes) {
+        await closeOpenAlert(alerts[alert]);
+        return;
+    }
+
+    if (sendTime <= p2AlertMinutes) {
         console.log(
             `Latest "${alert}" with id ${
                 mostRecentSend._id
@@ -65,7 +41,18 @@ const triggerAlert = async (
                 DateTime.DATETIME_SHORT
             )}, creating ${envVars.SEND_DELAY_P1_MINUTES} minutes alert`
         );
-        await createAlert(alerts[alert].p2Alert);
+        await createAlert(alerts[alert]);
+    }
+
+    if (sendTime <= p1AlertMinutes) {
+        console.log(
+            `Latest "${alert}" with id ${
+                mostRecentSend._id
+            } sent at ${sendTime.toLocaleString(
+                DateTime.DATETIME_SHORT
+            )}, creating ${envVars.SEND_DELAY_P2_MINUTES} minutes alert`
+        );
+        await escalateAlert(alerts[alert], Priority.P1);
     }
 };
 

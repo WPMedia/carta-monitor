@@ -3,9 +3,9 @@ import { NewsletterSend } from "./campaignSendAlerts";
 import { Collection, Db, MongoClient, ObjectId } from "mongodb";
 import { getMongoDatabase, sendFilters } from "../mongo";
 import { MongoMemoryServer } from "mongodb-memory-server";
-import { closeOpenAlert, createAlert } from "../opsGenie";
+import { closeOpenAlert, createAlert, escalateAlert } from "../opsGenie";
 import { baseSend } from "./send";
-import { CartaAlerts } from "../alerts";
+import { CartaAlerts, Priority } from "../alerts";
 import { envVars } from "../environmentVariables";
 
 jest.mock("../opsGenie", () => ({
@@ -87,10 +87,7 @@ describe("Checking that sends are occuring regularly", () => {
         await baseSend();
 
         expect(closeOpenAlert).toHaveBeenCalledWith(
-            CartaAlerts.Transactional_Send_Delay_P2
-        );
-        expect(closeOpenAlert).toHaveBeenCalledWith(
-            CartaAlerts.Transactional_Send_Delay_P1
+            CartaAlerts.Transactional_Send_Delay
         );
     });
 
@@ -104,12 +101,10 @@ describe("Checking that sends are occuring regularly", () => {
 
         await baseSend();
 
-        expect(createAlert).toHaveBeenCalledWith(
-            CartaAlerts.Alert_Send_Delay_P2
-        );
+        expect(createAlert).toHaveBeenCalledWith(CartaAlerts.Alert_Send_Delay);
     });
 
-    test("should create personalized 30 minutes send alert", async () => {
+    test("should escalated personalized send after 30 minutes", async () => {
         const oldSend = {
             ...defaultSend,
             statusDoneTimestamp: now.minus({ minutes: 31 }).toJSDate(),
@@ -119,8 +114,9 @@ describe("Checking that sends are occuring regularly", () => {
 
         await baseSend();
 
-        expect(createAlert).toHaveBeenCalledWith(
-            CartaAlerts.Personalized_Send_Delay_P1
+        expect(escalateAlert).toHaveBeenCalledWith(
+            CartaAlerts.Personalized_Send_Delay,
+            Priority.P1
         );
     });
 
@@ -154,13 +150,20 @@ describe("Checking that sends are occuring regularly", () => {
         await baseSend();
 
         expect(createAlert).toHaveBeenCalledWith(
-            CartaAlerts.Personalized_Send_Delay_P1
+            CartaAlerts.Personalized_Send_Delay
         );
+        expect(escalateAlert).toHaveBeenCalledWith(
+            CartaAlerts.Personalized_Send_Delay,
+            Priority.P1
+        );
+
         expect(createAlert).toHaveBeenCalledWith(
-            CartaAlerts.NonPersonalized_Send_Delay_P2
+            CartaAlerts.NonPersonalized_Send_Delay
         );
+
+        expect(createAlert).toHaveBeenCalledWith(CartaAlerts.Alert_Send_Delay);
         expect(closeOpenAlert).toHaveBeenCalledWith(
-            CartaAlerts.Transactional_Send_Delay_P1
+            CartaAlerts.Alert_Send_Delay
         );
     });
 });
