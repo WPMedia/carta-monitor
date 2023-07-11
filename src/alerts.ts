@@ -66,6 +66,25 @@ interface AlertDetails {
     description?: string;
 }
 
+const createSendDelayMessage = (
+    alertType: string,
+    campaignIdOrName: string
+) => {
+    return {
+        priority: Priority.P2,
+        message: `Viewers have not received ${alertType} emails in the last ${envVars.SEND_DELAY_P2_MINUTES} minutes`,
+        description: `
+        1. Check ${alertType} Campaign: ${campaignIdOrName}
+        2. Check nlSend records with filter ${JSON.stringify(
+            sendFilters[alertType.toLowerCase()]
+        )}, sorted by statusDoneTimestamp
+        
+        Note: Will escalate to P1 after ${
+            envVars.SEND_DELAY_P1_MINUTES
+        } minutes`
+    };
+};
+
 export const alertDetails: { [K in CartaAlerts]: AlertDetails } = {
     [CartaAlerts.Schedule_Transactional_Send]: {
         priority: Priority.P2,
@@ -83,62 +102,22 @@ export const alertDetails: { [K in CartaAlerts]: AlertDetails } = {
         priority: Priority.P1,
         message: "Failed to send an alert send"
     },
-    [CartaAlerts.Transactional_Send_Delay]: {
-        priority: Priority.P2,
-        message: `Viewers have not received transactional emails in last ${envVars.SEND_DELAY_P2_MINUTES} minutes`,
-        description: `
-        1. Check Transactional Campaign: ${envVars.TRANSACTIONAL_CAMPAIGN_ID}
-        2. Check nlSend records with filter ${JSON.stringify(
-            sendFilters["transactional"]
-        )}, sorted by statusDoneTimestamp.
-        
-        Note: Will escalate to P1 after ${
-            envVars.SEND_DELAY_P1_MINUTES
-        } minutes`
-    },
-    [CartaAlerts.Personalized_Send_Delay]: {
-        priority: Priority.P2,
-        message: `Viewers have not received personalized emails in last ${envVars.SEND_DELAY_P2_MINUTES} minutes`,
-        description: `
-        1. Check Personalized Campaign: ${
-            envVars.PERSONALIZED_CAMPAIGN_ID
-        }       
-        2. Check nlSend records with filter ${JSON.stringify(
-            sendFilters["personalized"]
-        )}, sorted by statusDoneTimestamp
-        
-        Note: Will escalate to P1 after ${
-            envVars.SEND_DELAY_P1_MINUTES
-        } minutes`
-    },
-    [CartaAlerts.NonPersonalized_Send_Delay]: {
-        priority: Priority.P2,
-        message: `Viewers have not received nonpersonalized emails in last ${envVars.SEND_DELAY_P2_MINUTES} minutes`,
-        description: `
-        1. Check Nonpersonalized Campaign: ${
-            envVars.NONPERSONALIZED_CAMPAIGN_ID
-        }
-        2. Check nlSend records with filter ${JSON.stringify(
-            sendFilters["nonpersonalized"]
-        )}, sorted by statusDoneTimestamp
-        
-        Note: Will escalate to P1 after ${
-            envVars.SEND_DELAY_P1_MINUTES
-        } minutes`
-    },
-    [CartaAlerts.Alert_Send_Delay]: {
-        priority: Priority.P2,
-        message: `Viewers have not received alerts in last ${envVars.SEND_DELAY_P2_MINUTES} minutes`,
-        description: `
-        1. Check Alert Campaign: ${envVars.ALERT_CAMPAIGN_NAME}
-        2. Check nlSend records with filter ${JSON.stringify(
-            sendFilters["alert"]
-        )}, sorted by statusDoneTimestamp
-        
-        Note: Will escalate to P1 after ${
-            envVars.SEND_DELAY_P1_MINUTES
-        } minutes`
-    },
+    [CartaAlerts.Transactional_Send_Delay]: createSendDelayMessage(
+        "Transactional",
+        envVars.TRANSACTIONAL_CAMPAIGN_ID
+    ),
+    [CartaAlerts.Personalized_Send_Delay]: createSendDelayMessage(
+        "Personalized",
+        envVars.PERSONALIZED_CAMPAIGN_ID
+    ),
+    [CartaAlerts.NonPersonalized_Send_Delay]: createSendDelayMessage(
+        "Nonpersonalized",
+        envVars.NONPERSONALIZED_CAMPAIGN_ID
+    ),
+    [CartaAlerts.Alert_Send_Delay]: createSendDelayMessage(
+        "Alert",
+        envVars.ALERT_CAMPAIGN_NAME
+    ),
     [CartaAlerts.Metrics_Processing_Above_Threshshold]: {
         priority: Priority.P2,
         message: "Events collection is backed up",
