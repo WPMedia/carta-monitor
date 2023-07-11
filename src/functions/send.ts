@@ -26,7 +26,7 @@ const triggerAlert = async (
     const p1AlertMinutes = +envVars.SEND_DELAY_P1_MINUTES;
 
     console.log(
-        `Most recent ${alert.toUpperCase()} sent ${minutesAgo} minute(s) ago. id: ${
+        `Most recent ${alert.toUpperCase()} send ${minutesAgo} minute(s) ago. id: ${
             mostRecentSend._id
         }`
     );
