@@ -57,7 +57,10 @@ export const baseTestAlert = async () => {
         );
     } catch (error) {
         console.error(`Failed to send alert: ${error}`);
-        await createAlert(CartaAlerts.Alert_Send);
+        await createAlert(
+            CartaAlerts.Alert_Send,
+            `Failed to send alert: ${error}`
+        );
     }
 
     return {
