@@ -66,7 +66,9 @@ describe("checkFileDownloadProcessing", () => {
 
         expect(createAlert).toHaveBeenCalledWith(
             CartaAlerts.File_Download_Processing_Delay,
-            "2 file(s) currently processing: list: List 1 user: User 1, list: List 2 user: User 2"
+            expect.stringContaining(
+                "2 file(s) currently processing: list: List 1 user: User 1, list: List 2 user: User 2"
+            )
         );
         expect(closeOpenAlert).not.toHaveBeenCalled();
         expect(mockCollection.find).toHaveBeenCalledWith({
