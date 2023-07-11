@@ -57,7 +57,7 @@ export const enum CartaAlerts {
 
     // Unknown issue with monitor
     // How to test: Any unhandled error
-    Carta_Monitor_Error = "Carta_Monitor_Error"
+    Unknown_Carta_Monitor_Error = "Unknown_Carta_Monitor_Error"
 }
 
 interface AlertDetails {
@@ -165,7 +165,7 @@ export const alertDetails: { [K in CartaAlerts]: AlertDetails } = {
         priority: Priority.P1,
         message: "Carta-sender returning failed response"
     },
-    [CartaAlerts.Carta_Monitor_Error]: {
+    [CartaAlerts.Unknown_Carta_Monitor_Error]: {
         priority: Priority.P3,
         message: "Carta-monitor threw an unexpected error"
     }

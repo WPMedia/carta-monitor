@@ -21,19 +21,22 @@ const triggerAlert = async (
 ) => {
     const sendTime = DateTime.fromJSDate(mostRecentSend.statusDoneTimestamp);
     const utcNow = now.setZone("utc"); // convert to UTC to compare to UTC entry in mongo
-    const p2AlertMinutes = utcNow.minus({
-        minutes: +envVars.SEND_DELAY_P2_MINUTES
-    });
-    const p1AlertMinutes = utcNow.minus({
-        minutes: +envVars.SEND_DELAY_P1_MINUTES
-    });
+    const minutesAgo = Math.floor(utcNow.diff(sendTime, "minutes").minutes);
+    const p2AlertMinutes = +envVars.SEND_DELAY_P2_MINUTES;
+    const p1AlertMinutes = +envVars.SEND_DELAY_P1_MINUTES;
 
-    if (sendTime > p2AlertMinutes) {
+    console.log(
+        `Most recent ${alert.toUpperCase()} at ${sendTime.toLocaleString(
+            DateTime.DATETIME_SHORT
+        )} with id ${mostRecentSend._id}, ${minutesAgo} minute(s) ago`
+    );
+
+    if (minutesAgo < p2AlertMinutes) {
         await closeOpenAlert(alerts[alert]);
         return;
     }
 
-    if (sendTime <= p2AlertMinutes) {
+    if (minutesAgo >= p2AlertMinutes) {
         console.log(
             `Latest "${alert}" with id ${
                 mostRecentSend._id
@@ -44,7 +47,7 @@ const triggerAlert = async (
         await createAlert(alerts[alert]);
     }
 
-    if (sendTime <= p1AlertMinutes) {
+    if (minutesAgo >= p1AlertMinutes) {
         console.log(
             `Latest "${alert}" with id ${
                 mostRecentSend._id

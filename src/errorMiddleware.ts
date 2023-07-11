@@ -5,7 +5,10 @@ export const errorHandlerMiddleware = () => {
     return {
         onError: async (handler) => {
             // Create an alert to catch and alert on generic errors in carta-monitor
-            await createAlert(CartaAlerts.Carta_Monitor_Error, handler.error);
+            await createAlert(
+                CartaAlerts.Unknown_Carta_Monitor_Error,
+                handler.error
+            );
             return {
                 statusCode: 500,
                 body: JSON.stringify("An error occurred"),
@@ -16,7 +19,7 @@ export const errorHandlerMiddleware = () => {
             };
         },
         after: async () => {
-            await closeOpenAlert(CartaAlerts.Carta_Monitor_Error);
+            await closeOpenAlert(CartaAlerts.Unknown_Carta_Monitor_Error);
         }
     };
 };
