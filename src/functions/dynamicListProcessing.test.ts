@@ -11,7 +11,8 @@ import { CartaAlerts } from "../alerts";
 import { envVars } from "../environmentVariables";
 
 jest.mock("../opsGenie", () => ({
-    createAlert: jest.fn()
+    createAlert: jest.fn(),
+    closeOpenAlert: jest.fn()
 }));
 
 jest.mock("../environmentVariables", () => ({

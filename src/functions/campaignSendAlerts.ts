@@ -27,12 +27,6 @@ const messages: Record<SendState, string> = {
     alarm: "is taking longer than expected. Updating sendState to alarm"
 };
 
-/**
- * Evaluate the send status of a newsletter
- *
- * @param {NewsletterSend} newsletterSend - The newsletter send object
- * @returns {null | { state: SendState; id: string }} - The state and id of the newsletter, or null if no sends have been attempted
- */
 export const evaluateNewsletterSend = (
     newsletterSend: NewsletterSend
 ): null | { state: SendState; id: ObjectId } => {
@@ -41,7 +35,6 @@ export const evaluateNewsletterSend = (
             .diffNow("minutes")
             .toObject().minutes
     );
-
     const sentSuccessfulCount = newsletterSend.metricsSentEmails ?? 0;
     const sentFailedCount = newsletterSend.metricsSentEmailsErr ?? 0;
     const attemptedSendCount = sentSuccessfulCount + sentFailedCount;
@@ -112,8 +105,8 @@ export const baseCampaignSendAlerts = async () => {
     // nlSend records that have been scheduled to send in the last 24 hours
     // Ideally, we'd use scheduledSendTime, but that field is not indexed on nlSend,
     // and statusWaitTimestamp is indexed, and should be within a minute of scheduledSendTime
-    const twentyFourHoursAgo = DateTime.now().minus({ days: 1 });
     const now = DateTime.now();
+    const twentyFourHoursAgo = now.minus({ days: 1 });
     const recentNlSendsQuery = {
         statusWaitTimestamp: {
             $gte: twentyFourHoursAgo.toMillis(),

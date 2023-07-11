@@ -139,7 +139,15 @@ export const alertDetails: { [K in CartaAlerts]: AlertDetails } = {
     },
     [CartaAlerts.Multiple_Campaign_Send_Delay]: {
         priority: Priority.P1,
-        message: "Email send of multiple campaigns is delayed."
+        message: "Email send of multiple campaigns is delayed.",
+        description: `If this happens, there are two likely culprits:
+1. A serious error in the email queuing/sending that causes all send attempts to fail
+2. An error in multiple letters/campaigns that causes the send to fail to at least 10% of users on at least two sends
+To see if 1 is the case, try a couple test sends. If they fail, look for errors in Splunk.
+        
+If test sends work, the issue is likely a bad template/config on at least two campaigns (#2 above). Go to the Carta Status page and find out which sends have not sent to the expected number of users. If the delivery metrics are reasonably up to date, you can identify these by finding campaigns with a “Delivery rate” under 90% (if the send success rate is 80%, the delivery rate will be less than that, so this would be a quick way to find likely culprits).
+        
+Then, search Splunk logs for errors relating to these sends. In the past, the issue has been some users do not have variables referenced in templates, causing those sends to fail.`
     },
     [CartaAlerts.Carta_Sender]: {
         priority: Priority.P1,
