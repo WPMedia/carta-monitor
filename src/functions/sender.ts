@@ -31,9 +31,8 @@ const sendEmail = async () => {
     const cartaSenderKey = ssmCache["carta.sender.endpoint.access.key"];
 
     console.log(
-        `Invocking carta-sender at ${
-            envVars.NONPERSONALIZED_SENDER_URL
-        }\npayload: ${JSON.stringify(sendEvent, null, 2)}`
+        `Invocking carta-sender at ${envVars.NONPERSONALIZED_SENDER_URL}
+        payload: ${JSON.stringify(sendEvent, null, 2)}`
     );
     const response = await fetch(envVars.NONPERSONALIZED_SENDER_URL, {
         method: "POST",

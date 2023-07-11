@@ -31,29 +31,29 @@ export const baseTestAlert = async () => {
                 }
             }
         });
-        const response = await fetch(
-            envVars.LIST_MANAGEMENT_SEND_ALERT as string,
-            {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    Authorization: `Bearer ${listManagementToken}`
-                },
-                body
-            }
+        console.log(
+            `Sending list-management alert to ${
+                envVars.LIST_MANAGEMENT_SEND_ALERT
+            }\npayload:\n${JSON.stringify(body, null, 2)}`
         );
+        const response = await fetch(envVars.LIST_MANAGEMENT_SEND_ALERT, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${listManagementToken}`
+            },
+            body
+        });
         const result = (await response.json()) as {
             status: "success" | "failure";
         };
         if (result.status === "success") {
-            console.log("Successfully sent alert");
+            console.log("Successfully sent alert email via list-management");
             await closeOpenAlert(CartaAlerts.Alert_Send);
             return;
         }
         throw new Error(
-            `Alert fetch returned a failure response: ${JSON.stringify(
-                result
-            )}; ${envVars.LIST_MANAGEMENT_SEND_ALERT} with body: ${body}`
+            `Alert fetch returned a failure response: ${JSON.stringify(result)}`
         );
     } catch (error) {
         console.error(`Failed to send alert: ${error}`);

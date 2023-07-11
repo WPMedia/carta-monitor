@@ -12,9 +12,10 @@ export const enum CartaAlerts {
     // Schedule alerts
     // These alerts check if there have been any 'send' events in the past 15 and 30 minutes for different types of sends.
     // If no activity is detected, an alert is triggered.
-    // How to test: go to campaigns from .env (CAMPAIGN_ID's and ALERT_CAMPAIGN_NAME)
-    // and edit something that breaks the send
-    // such as remove Recipients from Recipients List, breaking template, etc.
+    // How to test: no effect way to test,
+    // instead, if this does not work, the error will show itself via the "Delay" alerts,
+    // because if we are not sending letters regularly,
+    // those alerts will fire
     Schedule_Transactional_Send = "Schedule_Transactional_Send",
     Schedule_Personalized_Send = "Schedule_Personalized_Send",
     Schedule_Nonpersonalized_Send = "Schedule_Nonpersonalized_Send",
@@ -27,6 +28,7 @@ export const enum CartaAlerts {
     Transactional_Send_Delay = "Transactional_Send_Delay",
     Personalized_Send_Delay = "Personalized_Send_Delay",
     NonPersonalized_Send_Delay = "NonPersonalized_Send_Delay",
+    // How to test: make ALERT_EMAIL_LIST an invalid list
     Alert_Send_Delay = "Alert_Send_Delay",
 
     // Metrics alerts
