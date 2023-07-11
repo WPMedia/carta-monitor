@@ -13,7 +13,7 @@ const sendEvent = {
     textBody: '[[ "example" | capitalize ]]',
     to: [
         {
-            email: "carta-test@washpost.com"
+            email: envVars.CARTA_SENDER_EMAIL
         }
     ],
     body: Buffer.from(
@@ -21,12 +21,10 @@ const sendEvent = {
     ).toString("base64")
 };
 
-type SendResult =
-    | {
-          totalFailedSends: number;
-          totalSuccessfulSends: number;
-      }
-    | { error: Error };
+type SendResult = {
+    totalFailedSent: number;
+    error: string;
+};
 
 const sendEmail = async () => {
     const ssmCache = await getSsmCache();
@@ -43,11 +41,11 @@ const sendEmail = async () => {
 
     if (!response.ok) {
         throw new Error(
-            `Failed to send email: ${response.status} ${response.statusText}`
+            `Bad response from carta-sender network request: ${response.status} ${response.statusText}`
         );
     }
 
-    return (await response.json()) as SendResult;
+    return await response.json();
 };
 
 export const baseSender = async () => {
@@ -55,14 +53,15 @@ export const baseSender = async () => {
 
     try {
         result = await sendEmail();
-        if ("error" in result || result.totalFailedSends > 0) {
-            throw new Error(JSON.stringify(result));
+        if (result.totalFailedSent > 0) {
+            throw new Error(
+                `Carta-sender invocation returned a failure. Response: ${JSON.stringify(
+                    result
+                )}`
+            );
         }
     } catch (error) {
-        createAlert(
-            CartaAlerts.Carta_Sender,
-            `Failed to send to carta-sender: ${error.message}`
-        );
+        createAlert(CartaAlerts.Carta_Sender, error.message);
         return;
     }
 

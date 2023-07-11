@@ -52,7 +52,7 @@ export const enum CartaAlerts {
     Multiple_Campaign_Send_Delay = "Multiple_Campaign_Send_Delay", // Email send of multiple campaigns is delayed.
 
     // Carta-sender
-    // How to test: pass invalid url to NONPERSONALIZED_SENDER_URL .env variable
+    // How to test: pass an invalid email, like "12345", to the CARTA_SENDER_EMAIL variable
     Carta_Sender = "Carta_Sender",
 
     // Unknown issue with monitor

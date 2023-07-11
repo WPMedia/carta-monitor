@@ -18,7 +18,8 @@ const EnvVars = [
     "MINUTES_PER_ALLOWED_TIME_SEGMENT",
     "SUCCESSFUL_SEND_COMPLETION_PERCENTAGE",
     "SEND_DELAY_P2_MINUTES",
-    "SEND_DELAY_P1_MINUTES"
+    "SEND_DELAY_P1_MINUTES",
+    "CARTA_SENDER_EMAIL"
 ] as const;
 
 type EnvVar = (typeof EnvVars)[number];
