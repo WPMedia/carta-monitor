@@ -121,8 +121,7 @@ export const alertDetails: { [K in CartaAlerts]: AlertDetails } = {
     [CartaAlerts.Metrics_Processing_Above_Threshshold]: {
         priority: Priority.P2,
         message: "Events collection is backed up",
-        description:
-            "Check if the metrics processor is running and progressing through entries in the events collection"
+        description: `More than ${+envVars.METRICS_EVENTS_COUNT_ALERT_THRESHHOLD} entries detected in "events" collection. Check if the metrics processor is running and progressing through entries.`
     },
     [CartaAlerts.File_Download_Processing_Delay]: {
         priority: Priority.P2,
