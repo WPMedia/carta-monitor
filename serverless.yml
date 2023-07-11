@@ -31,6 +31,7 @@ provider:
         SUCCESSFUL_SEND_COMPLETION_PERCENTAGE: ${env:SUCCESSFUL_SEND_COMPLETION_PERCENTAGE}
         SEND_DELAY_P1_MINUTES: ${env:SEND_DELAY_P1_MINUTES}
         SEND_DELAY_P2_MINUTES: ${env:SEND_DELAY_P2_MINUTES}
+        CARTA_SENDER_EMAIL: ${env:CARTA_SENDER_EMAIL}
         STAGE: ${opt:stage, "local"}
         IS_LOCAL: false
         ENV: ${opt:stage, "local"}
