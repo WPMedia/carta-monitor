@@ -10,7 +10,7 @@ const OPS_GENIE_BASE_URL = `https://api.opsgenie.com/v2/alerts/`;
 async function makeOpsGenieRequest(
     path: string,
     method: HttpMethod,
-    data?: any
+    data?: NonNullable<unknown>
 ): Promise<{
     result: string;
     took: number;
