@@ -37,24 +37,12 @@ const triggerAlert = async (
     }
 
     if (minutesAgo >= p2AlertMinutes) {
-        console.log(
-            `Latest "${alert}" with id ${
-                mostRecentSend._id
-            } sent at ${sendTime.toLocaleString(
-                DateTime.DATETIME_SHORT
-            )}, creating ${envVars.SEND_DELAY_P2_MINUTES} minutes alert`
-        );
+        console.log(`At least ${p2AlertMinutes} delay, creating alert`);
         await createAlert(alerts[alert]);
     }
 
     if (minutesAgo >= p1AlertMinutes) {
-        console.log(
-            `Latest "${alert}" with id ${
-                mostRecentSend._id
-            } sent at ${sendTime.toLocaleString(
-                DateTime.DATETIME_SHORT
-            )}, escalating alert`
-        );
+        console.log(`At least ${p1AlertMinutes} delay, escalating alert`);
         await escalateAlert(alerts[alert], Priority.P1);
     }
 };
