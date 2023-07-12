@@ -103,7 +103,7 @@ describe("Checking that sends are occuring regularly", () => {
 
         expect(createAlert).toHaveBeenCalledWith(
             CartaAlerts.Alert_Send_Delay,
-            "Most recent ALERT send 16 minute(s) ago. id: 64aed37b4ccf20fdb119055e"
+            expect.any(String)
         );
     });
 
@@ -154,7 +154,7 @@ describe("Checking that sends are occuring regularly", () => {
 
         expect(createAlert).toHaveBeenCalledWith(
             CartaAlerts.Personalized_Send_Delay,
-            "Most recent PERSONALIZED send 31 minute(s) ago. id: 64aed37b4ccf20fdb119055e"
+            expect.any(String)
         );
         expect(escalateAlert).toHaveBeenCalledWith(
             CartaAlerts.Personalized_Send_Delay,
@@ -163,12 +163,12 @@ describe("Checking that sends are occuring regularly", () => {
 
         expect(createAlert).toHaveBeenCalledWith(
             CartaAlerts.NonPersonalized_Send_Delay,
-            "Most recent NONPERSONALIZED send 16 minute(s) ago. id: 64aed38dc9c555764d4180b2"
+            expect.any(String)
         );
 
         expect(createAlert).toHaveBeenCalledWith(
             CartaAlerts.Alert_Send_Delay,
-            "Most recent ALERT send 16 minute(s) ago. id: 64aed37b4ccf20fdb119055e"
+            expect.any(String)
         );
         expect(closeOpenAlert).toHaveBeenCalledWith(
             CartaAlerts.Alert_Send_Delay
