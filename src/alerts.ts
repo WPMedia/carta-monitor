@@ -76,6 +76,11 @@ const createSendDelayMessage = (
         priority: Priority.P2,
         message: `Viewers have not received ${alertType} emails in the last ${envVars.SEND_DELAY_P2_MINUTES} minutes`,
         description: `
+        According to our nlSend collection, there has not been a ${alertType} letter marked with a statusDoneTimestamp in the last ${
+            envVars.SEND_DELAY_P2_MINUTES
+        }
+
+        How to look into the issue:
         1. Check ${alertType} Campaign: ${campaignIdOrName}
         2. Check nlSend records with filter ${JSON.stringify(
             sendFilters[alertType.toLowerCase()]
