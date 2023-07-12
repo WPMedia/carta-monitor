@@ -25,9 +25,9 @@ const triggerAlert = async (
     const p2AlertMinutes = +envVars.SEND_DELAY_P2_MINUTES;
     const p1AlertMinutes = +envVars.SEND_DELAY_P1_MINUTES;
 
-    const lastSendInfo = `Most recent ${alert.toUpperCase()} send ${minutesAgo} minute(s) ago. id: ${
-        mostRecentSend._id
-    }`;
+    const lastSendInfo = `Most recent ${alert.toUpperCase()} send ${minutesAgo} minute(s) ago. letterId: ${
+        mostRecentSend.letterId
+    }. nlSendId: ${mostRecentSend._id}`;
     console.log(lastSendInfo);
 
     if (minutesAgo < p2AlertMinutes) {
