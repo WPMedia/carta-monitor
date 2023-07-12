@@ -17,10 +17,10 @@ const getParametersFromSSM = async (): Promise<{
     [K in SsmParameterKeysLiteral]: string;
 }> => {
     const results: Partial<{ [K in SsmParameterKeysLiteral]: string }> = {};
-
+    console.log("getting SSM params");
     for (const key of ssmParameterKeys) {
         const parameterName = `/carta/${
-            envVars.STAGE === "PROD" ? "prod" : "sandbox"
+            envVars.STAGE === "prod" ? "prod" : "sandbox"
         }/${key}`;
 
         const getParameterCommand = new GetParameterCommand({

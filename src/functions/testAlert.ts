@@ -14,7 +14,7 @@ export const baseTestAlert = async () => {
         });
         const getParameterCommand = new GetParameterCommand({
             Name: `/carta/${
-                envVars.STAGE === "PROD" ? "prod" : "sandbox"
+                envVars.STAGE === "prod" ? "prod" : "sandbox"
             }/list.management.user.token.carta.monitor`
         });
 
