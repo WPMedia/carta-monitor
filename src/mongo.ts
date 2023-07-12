@@ -14,7 +14,6 @@ export const getMongoDatabase = async (): Promise<{
         "{0}",
         mongoConnectionStringPassword
     );
-    console.log(`connection string debug: ${mongoUri}`);
     const client = new MongoClient(mongoUri);
 
     try {
