@@ -70,7 +70,9 @@ export async function createAlert(
         }] ${message}`,
         alias,
         description:
-            description ?? customDescription ?? "No description provided",
+            !customDescription && !description
+                ? "No description provided"
+                : `${customDescription} ${description}`,
         priority: environmentPriority
     });
     console.log(`Alert ${alias} created successfully: ${JSON.stringify(json)}`);

@@ -25,11 +25,10 @@ const triggerAlert = async (
     const p2AlertMinutes = +envVars.SEND_DELAY_P2_MINUTES;
     const p1AlertMinutes = +envVars.SEND_DELAY_P1_MINUTES;
 
-    console.log(
-        `Most recent ${alert.toUpperCase()} send ${minutesAgo} minute(s) ago. id: ${
-            mostRecentSend._id
-        }`
-    );
+    const lastSendInfo = `Most recent ${alert.toUpperCase()} send ${minutesAgo} minute(s) ago. id: ${
+        mostRecentSend._id
+    }`;
+    console.log(lastSendInfo);
 
     if (minutesAgo < p2AlertMinutes) {
         await closeOpenAlert(alerts[alert]);
@@ -38,7 +37,7 @@ const triggerAlert = async (
 
     if (minutesAgo >= p2AlertMinutes) {
         console.log(`At least ${p2AlertMinutes} delay, creating alert`);
-        await createAlert(alerts[alert]);
+        await createAlert(alerts[alert], lastSendInfo);
     }
 
     if (minutesAgo >= p1AlertMinutes) {
