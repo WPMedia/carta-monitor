@@ -10,12 +10,16 @@ export const baseCheckMetricsProcessing = async () => {
     const eventsCollection = db.collection("events");
 
     const eventsCount = await eventsCollection.estimatedDocumentCount();
+    const threshhold = +envVars.METRICS_EVENTS_COUNT_ALERT_THRESHHOLD;
 
-    if (eventsCount < +envVars.METRICS_EVENTS_COUNT_ALERT_THRESHHOLD) {
+    console.log(
+        `Current events count: ${eventsCount}. Set threshhold: ${threshhold}.`
+    );
+    if (eventsCount < threshhold) {
         await closeOpenAlert(CartaAlerts.Metrics_Processing_Above_Threshshold);
     } else {
         console.log(
-            "above the events collection count threshold; opening alert"
+            `Count ${eventsCount} above the events collection count threshold of ${threshhold}; opening alert`
         );
         await createAlert(CartaAlerts.Metrics_Processing_Above_Threshshold);
     }

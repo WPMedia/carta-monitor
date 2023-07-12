@@ -23,12 +23,15 @@ export const baseCheckFileDownloadProcessing = async () => {
     const { db, client } = await getMongoDatabase();
     const fileDownloadCollection = db.collection("file_download_details");
 
-    const fifteenMinutesAgo = DateTime.local().minus({
-        minutes: +envVars.FILE_DOWNLOAD_PROCESSING_THRESHHOLD_MINUTES
+    const fileDownloadProcessMinutes =
+        +envVars.FILE_DOWNLOAD_PROCESSING_THRESHHOLD_MINUTES;
+
+    const fileDownloadProcessDateTime = DateTime.local().minus({
+        minutes: fileDownloadProcessMinutes
     });
     const queryDoc = {
         status: "submitted",
-        created_time: { $lte: fifteenMinutesAgo }
+        created_time: { $lte: fileDownloadProcessDateTime }
     };
 
     const submittedDownloadList = await fileDownloadCollection
@@ -50,10 +53,10 @@ export const baseCheckFileDownloadProcessing = async () => {
         };
     }
 
-    const listNames = submittedDownloadList.map((download) => {
-        const user = download.user;
-        return `list: ${download.list_name} user: ${user.user_name}`;
-    });
+    const listNames = submittedDownloadList.map(
+        (download) =>
+            `list: ${download.list_name} user: ${download.user.user_name}`
+    );
 
     await createAlert(
         CartaAlerts.File_Download_Processing_Delay,

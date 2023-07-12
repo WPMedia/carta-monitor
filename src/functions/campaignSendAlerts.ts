@@ -19,13 +19,10 @@ export type NewsletterSend = {
     statusDoneTimestamp: Date;
 };
 
-export type SendState = "done" | "warning" | "alarm";
-
-const messages: Record<SendState, string> = {
-    done: "now complete. Updating sendState to done",
-    warning: "still incomplete. Updating sendState to warning",
-    alarm: "is taking longer than expected. Updating sendState to alarm"
-};
+export type SendState =
+    | "done" // Considered "complete"
+    | "warning" // Considered "incomplete" (P1 send delay)
+    | "alarm"; // Taking longer than expected (P0 send delay)
 
 export const evaluateNewsletterSend = (
     newsletterSend: NewsletterSend
@@ -86,9 +83,9 @@ export const updateSendState = async (
 ) => {
     if (ids.length > 0) {
         console.log(
-            `Email sending for letter(s) ${ids.join(", ")} ${
-                messages[sendState]
-            }`
+            `Marking the following nlSend id(s) as "${sendState}": ${ids.join(
+                ", "
+            )}`
         );
         await nlSendCollection.updateMany(
             { _id: { $in: ids.map((id) => id) } },
@@ -132,27 +129,38 @@ export const baseCampaignSendAlerts = async () => {
         })
         .toArray();
 
-    const doneCampaignLetterIds: ObjectId[] = [];
-    const warningCampaignLetterIds: ObjectId[] = [];
-    const alarmCampaignLetterIds: ObjectId[] = [];
-    eligibleRecentNewsletterSends.forEach((newsletterSend) => {
-        const result = evaluateNewsletterSend(newsletterSend);
-        if (result) {
-            switch (result.state) {
-                case "done":
-                    doneCampaignLetterIds.push(result.id);
-                    break;
-                case "warning":
-                    warningCampaignLetterIds.push(result.id);
-                    break;
-                case "alarm":
-                    alarmCampaignLetterIds.push(result.id);
-                    break;
-                default:
-                    break;
+    if (eligibleRecentNewsletterSends.length === 0) {
+        console.log("No pending newsletter sends found");
+        await closeOpenAlert(CartaAlerts.Multiple_Campaign_Send_Delay);
+        return {
+            statusCode: 200,
+            body: JSON.stringify("Success"),
+            headers: {
+                "Content-Type": "application/json",
+                "Access-Control-Allow-Origin": "*"
             }
-        }
-    });
+        };
+    }
+
+    console.log(
+        `nlSend records that are A) sendState !== "done", B) scheduled in the last 24 hours, and C) send size greater than ${100}: ${eligibleRecentNewsletterSends
+            .map((s) => s._id)
+            .join(", ")}`
+    );
+
+    const results = eligibleRecentNewsletterSends
+        .map(evaluateNewsletterSend)
+        .filter(Boolean);
+
+    const doneCampaignLetterIds = results
+        .filter((result) => result.state === "done")
+        .map((result) => result.id);
+    const warningCampaignLetterIds = results
+        .filter((result) => result.state === "warning")
+        .map((result) => result.id);
+    const alarmCampaignLetterIds = results
+        .filter((result) => result.state === "alarm")
+        .map((result) => result.id);
 
     await updateSendState(nlSend, doneCampaignLetterIds, "done");
     await updateSendState(nlSend, warningCampaignLetterIds, "warning");
@@ -162,11 +170,11 @@ export const baseCampaignSendAlerts = async () => {
         warningCampaignLetterIds.length <= 1 &&
         alarmCampaignLetterIds.length === 0
     ) {
-        closeOpenAlert(CartaAlerts.Multiple_Campaign_Send_Delay);
+        await closeOpenAlert(CartaAlerts.Multiple_Campaign_Send_Delay);
     }
 
     if (warningCampaignLetterIds.length > 1) {
-        createAlert(
+        await createAlert(
             CartaAlerts.Multiple_Campaign_Send_Delay,
             `<p><a href="${
                 envVars.CARTA_UI_BASE_URL
@@ -177,7 +185,7 @@ export const baseCampaignSendAlerts = async () => {
     }
 
     if (alarmCampaignLetterIds.length > 0) {
-        escalateAlert(CartaAlerts.Multiple_Campaign_Send_Delay, "P0");
+        await escalateAlert(CartaAlerts.Multiple_Campaign_Send_Delay, "P0");
     }
 
     await client.close();
