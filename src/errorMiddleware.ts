@@ -7,7 +7,9 @@ export const errorHandlerMiddleware = () => {
             // Create an alert to catch and alert on generic errors in carta-monitor
             await createAlert(
                 CartaAlerts.Unknown_Carta_Monitor_Error,
-                handler.error
+                `Error from ${handler?.context?.logGroupName ?? "ERROR"}: ${
+                    handler?.error?.message ?? "No error provided"
+                }`
             );
             return {
                 statusCode: 500,

@@ -6,6 +6,7 @@ import { closeOpenAlert, createAlert } from "../opsGenie";
 import { errorHandlerMiddleware } from "../errorMiddleware";
 
 export const baseCheckMetricsProcessing = async () => {
+    throw Error("this is a test");
     const { db, client } = await getMongoDatabase();
     const eventsCollection = db.collection("events");
 
