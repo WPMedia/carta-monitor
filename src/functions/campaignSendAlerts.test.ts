@@ -71,8 +71,8 @@ const createSend = (overrides: Partial<NewsletterSend> = {}) => {
         letterId: "someLetterId",
         metricsSentEmails: 900000,
         metricsSentEmailsErr: 100000,
-        scheduledSendTime: now.toISO(),
-        statusWaitTimestamp: now.minus({ minutes: 1 }).toMillis(),
+        scheduledSendTime: now.toJSDate(),
+        statusWaitTimestamp: now.minus({ minutes: 1 }).toJSDate(),
         totalSendSize: 101,
         statusDoneTimestamp: now.toJSDate()
     };
@@ -122,7 +122,9 @@ describe("evaluateNewsletterSend", () => {
             const send = createSend({
                 metricsSentEmails: 899999,
                 metricsSentEmailsErr: 100000,
-                scheduledSendTime: DateTime.now().minus({ minutes: 31 }).toISO()
+                scheduledSendTime: DateTime.now()
+                    .minus({ minutes: 31 })
+                    .toJSDate()
             });
             checkState(send, "warning");
         });
@@ -131,7 +133,9 @@ describe("evaluateNewsletterSend", () => {
             const send = createSend({
                 metricsSentEmails: 1799998,
                 metricsSentEmailsErr: 200000,
-                scheduledSendTime: DateTime.now().minus({ minutes: 61 }).toISO()
+                scheduledSendTime: DateTime.now()
+                    .minus({ minutes: 61 })
+                    .toJSDate()
             });
             checkState(send, "warning");
         });
@@ -140,7 +144,9 @@ describe("evaluateNewsletterSend", () => {
             const send = createSend({
                 metricsSentEmails: 2699997,
                 metricsSentEmailsErr: 300000,
-                scheduledSendTime: DateTime.now().minus({ minutes: 91 }).toISO()
+                scheduledSendTime: DateTime.now()
+                    .minus({ minutes: 91 })
+                    .toJSDate()
             });
             checkState(send, "warning");
         });
@@ -151,14 +157,18 @@ describe("evaluateNewsletterSend", () => {
                 letterId: "newsletter1",
                 metricsSentEmails: 500000,
                 metricsSentEmailsErr: 100000,
-                scheduledSendTime: DateTime.now().minus({ minutes: 35 }).toISO()
+                scheduledSendTime: DateTime.now()
+                    .minus({ minutes: 35 })
+                    .toJSDate()
             });
             const send2 = createSend({
                 _id: id2,
                 letterId: "newsletter2",
                 metricsSentEmails: 700000,
                 metricsSentEmailsErr: 100000,
-                scheduledSendTime: DateTime.now().minus({ minutes: 40 }).toISO()
+                scheduledSendTime: DateTime.now()
+                    .minus({ minutes: 40 })
+                    .toJSDate()
             });
             const newsletterSends = [send1, send2];
 
@@ -178,7 +188,9 @@ describe("evaluateNewsletterSend", () => {
             const send = createSend({
                 metricsSentEmails: 899999,
                 metricsSentEmailsErr: 100000,
-                scheduledSendTime: DateTime.now().minus({ minutes: 91 }).toISO()
+                scheduledSendTime: DateTime.now()
+                    .minus({ minutes: 91 })
+                    .toJSDate()
             });
             checkState(send, "alarm");
         });
@@ -189,7 +201,7 @@ describe("evaluateNewsletterSend", () => {
                 metricsSentEmailsErr: 200000,
                 scheduledSendTime: DateTime.now()
                     .minus({ minutes: 121 })
-                    .toISO()
+                    .toJSDate()
             });
             checkState(send, "alarm");
         });
@@ -200,7 +212,7 @@ describe("evaluateNewsletterSend", () => {
                 metricsSentEmailsErr: 300000,
                 scheduledSendTime: DateTime.now()
                     .minus({ minutes: 151 })
-                    .toISO()
+                    .toJSDate()
             });
 
             checkState(send, "alarm");
@@ -221,7 +233,9 @@ describe("evaluateNewsletterSend", () => {
             const send = createSend({
                 metricsSentEmails: 1799998,
                 metricsSentEmailsErr: 200000,
-                scheduledSendTime: DateTime.now().minus({ minutes: 29 }).toISO()
+                scheduledSendTime: DateTime.now()
+                    .minus({ minutes: 29 })
+                    .toJSDate()
             });
             const result = evaluateNewsletterSend(send);
             expect(result).toBeNull();
@@ -242,13 +256,14 @@ describe("Call alerts", () => {
             createSend({
                 _id: id1,
                 metricsSentEmails: 1000000,
-                metricsSentEmailsErr: 100000
+                metricsSentEmailsErr: 100000,
+                scheduledSendTime: now.minus({ minutes: 15 }).toJSDate()
             }),
             createSend({
                 _id: id2,
                 metricsSentEmails: 899999,
                 metricsSentEmailsErr: 100000,
-                scheduledSendTime: now.minus({ minutes: 30 }).toISO()
+                scheduledSendTime: now.minus({ minutes: 31 }).toJSDate()
             })
         ]);
 
@@ -267,13 +282,13 @@ describe("Call alerts", () => {
                 _id: id1,
                 metricsSentEmails: 70000,
                 metricsSentEmailsErr: 100000,
-                scheduledSendTime: now.minus({ minutes: 30 }).toISO()
+                scheduledSendTime: now.minus({ minutes: 31 }).toJSDate()
             }),
             createSend({
                 _id: id2,
                 metricsSentEmails: 899999,
                 metricsSentEmailsErr: 100000,
-                scheduledSendTime: now.minus({ minutes: 30 }).toISO()
+                scheduledSendTime: now.minus({ minutes: 31 }).toJSDate()
             })
         ]);
 
@@ -292,13 +307,13 @@ describe("Call alerts", () => {
                 _id: id1,
                 metricsSentEmails: 70000,
                 metricsSentEmailsErr: 100000,
-                scheduledSendTime: now.minus({ minutes: 30 }).toISO()
+                scheduledSendTime: now.minus({ minutes: 30 }).toJSDate()
             }),
             createSend({
                 _id: id2,
                 metricsSentEmails: 899999,
                 metricsSentEmailsErr: 100000,
-                scheduledSendTime: now.minus({ minutes: 121 }).toISO() // cause alarm
+                scheduledSendTime: now.minus({ minutes: 121 }).toJSDate() // cause alarm
             })
         ]);
 

@@ -64,8 +64,8 @@ const defaultSend = {
     letterId: "someLetterId",
     metricsSentEmails: 900000,
     metricsSentEmailsErr: 100000,
-    scheduledSendTime: now.toISO(),
-    statusWaitTimestamp: now.minus({ minutes: 1 }).toMillis(),
+    scheduledSendTime: now.toJSDate(),
+    statusWaitTimestamp: now.minus({ minutes: 1 }).toJSDate(),
     totalSendSize: 101
 } as NewsletterSend;
 

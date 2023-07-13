@@ -57,7 +57,11 @@ export const enum CartaAlerts {
     // Campaign send alerts
     // These alerts monitor the status of newsletter campaigns and update their send state.
     // They also trigger alerts and escalate the alert level based on the campaign status.
-    // How to test: reduce threshhold for send to be considered delay via SENDS_PER_ALLOWED_TIME_SEGMENT, MINUTES_PER_ALLOWED_TIME_SEGMENT, and SUCCESSFUL_SEND_COMPLETION_PERCENTAGE
+    // How to test: Go to https://sandbox.washpost.arcpublishing.com/carta/status
+    // Find a sent letter with >100 sends in the last 24 hours (i.e. campaigns this alert checks)
+    // Go to it's metrics page (or use mongo) to find nlSend id
+    // For alert trigger, 1) remove "done" sendState (or mark null), and 2) change metricsSentEmailsErr to a number make ratio of success to failure to be less than SUCCESSFUL_SEND_COMPLETION_PERCENTAGE (90% currently)
+    // Then, campaignSendAlerts should see the not-done sendState, and mark a "warning" if send time greater than SEND_DELAY_P2_MINUTES (60 min), and "alert" if sent time greater than SEND_DELAY_P1_MINUTES (90 min)
     Multiple_Campaign_Send_Delay = "Multiple_Campaign_Send_Delay", // Email send of multiple campaigns is delayed.
 
     // Carta-sender
@@ -150,7 +154,7 @@ export const alertDetails: { [K in CartaAlerts]: AlertDetails } = {
         message: "Auto-running dynamic list(s) failed to run"
     },
     [CartaAlerts.Multiple_Campaign_Send_Delay]: {
-        priority: Priority.P1,
+        priority: Priority.P2,
         message: "Email send of multiple campaigns is delayed.",
         description: `If this happens, there are two likely culprits:
 1. A serious error in the email queuing/sending that causes all send attempts to fail

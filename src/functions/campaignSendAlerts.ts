@@ -2,7 +2,7 @@ import { Collection, ObjectId } from "mongodb";
 import { getMongoDatabase } from "../mongo";
 import { DateTime } from "luxon";
 import { closeOpenAlert, createAlert, escalateAlert } from "../opsGenie";
-import { CartaAlerts } from "../alerts";
+import { CartaAlerts, Priority } from "../alerts";
 import { envVars } from "../environmentVariables";
 import middy from "@middy/core";
 import { errorHandlerMiddleware } from "../errorMiddleware";
@@ -12,11 +12,11 @@ export type NewsletterSend = {
     letterId: string;
     metricsSentEmails: number;
     metricsSentEmailsErr: number;
-    scheduledSendTime: string;
+    scheduledSendTime: Date;
     sendState?: SendState;
-    statusWaitTimestamp: number;
+    statusWaitTimestamp: Date;
     totalSendSize: number;
-    statusDoneTimestamp: Date;
+    statusDoneTimestamp?: Date;
 };
 
 export type SendState =
@@ -27,40 +27,66 @@ export type SendState =
 export const evaluateNewsletterSend = (
     newsletterSend: NewsletterSend
 ): null | { state: SendState; id: ObjectId } => {
-    const minutesSinceScheduledSend = Math.abs(
-        DateTime.fromISO(newsletterSend.scheduledSendTime)
-            .diffNow("minutes")
-            .toObject().minutes
+    console.log(
+        `Evaluating nlSend ${newsletterSend._id} with send time ${newsletterSend.scheduledSendTime}`
     );
+    const utcNow = DateTime.now().setZone("utc"); // convert to UTC to compare to UTC entry in mongo
+    const scheduledSendTime = DateTime.fromJSDate(
+        newsletterSend.scheduledSendTime
+    );
+
+    const minutesSinceScheduledSend = Math.floor(
+        utcNow.diff(scheduledSendTime, "minutes").minutes
+    );
+
     const sentSuccessfulCount = newsletterSend.metricsSentEmails ?? 0;
     const sentFailedCount = newsletterSend.metricsSentEmailsErr ?? 0;
     const attemptedSendCount = sentSuccessfulCount + sentFailedCount;
 
     if (attemptedSendCount > 0) {
+        console.log("TEST ===" + sentFailedCount + "   " + attemptedSendCount);
         const sentPercentage = sentSuccessfulCount / attemptedSendCount;
-
+        console.log(`Sent percentage: ${sentPercentage}`);
         // Calculate the allotted time for a P1 alert. For every segment of attempted sends (defined by the configuration),
         // add a segment's worth of minutes to the threshold.
         // If less than one segment has been attempted, the minimum threshold is one segment's worth of time.
         const segmentCount = Math.floor(
             attemptedSendCount / +envVars.SENDS_PER_ALLOWED_TIME_SEGMENT
         );
-        const allotedMinutesForP1Alert =
+        const allotedMinutesForP2Alert =
             (1 + Math.floor(segmentCount)) *
             +envVars.MINUTES_PER_ALLOWED_TIME_SEGMENT;
 
-        const additionalMinutesForP0Alert = 60;
-        const allottedMinutesForP0Alert =
-            allotedMinutesForP1Alert + additionalMinutesForP0Alert;
+        const additionalMinutesForP1Alert = 60;
+        const allottedMinutesForP1Alert =
+            allotedMinutesForP2Alert + additionalMinutesForP1Alert;
 
+        console.log(
+            `Time before alerting - P2: ${allotedMinutesForP2Alert} minutes, P1: ${allottedMinutesForP1Alert} minutes`
+        );
+
+        const successfulSendCompletionPercentage =
+            +envVars.SUCCESSFUL_SEND_COMPLETION_PERCENTAGE;
         let state: SendState;
-        if (sentPercentage >= +envVars.SUCCESSFUL_SEND_COMPLETION_PERCENTAGE) {
+        if (sentPercentage >= successfulSendCompletionPercentage) {
+            console.log(
+                `Success! Send percentage ${sentPercentage} is above ${successfulSendCompletionPercentage}`
+            );
             state = "done";
-        } else if (minutesSinceScheduledSend > allottedMinutesForP0Alert) {
+        } else if (minutesSinceScheduledSend > allottedMinutesForP1Alert) {
+            console.log(
+                `Alarm! Send percentage ${sentPercentage} is too low and newsletter was scheduled ${minutesSinceScheduledSend} minutes ago`
+            );
             state = "alarm";
-        } else if (minutesSinceScheduledSend > allotedMinutesForP1Alert) {
+        } else if (minutesSinceScheduledSend > allotedMinutesForP2Alert) {
+            console.log(
+                `Warning! Send percentage ${sentPercentage} is too low and newsletter was scheduled ${minutesSinceScheduledSend} minutes ago`
+            );
             state = "warning";
         } else {
+            console.log(
+                `Ignoring newsletter for now, since send percentage below ${successfulSendCompletionPercentage} and scheduled only ${minutesSinceScheduledSend} minutes ago`
+            );
             return null;
         }
 
@@ -106,8 +132,8 @@ export const baseCampaignSendAlerts = async () => {
     const twentyFourHoursAgo = now.minus({ days: 1 });
     const recentNlSendsQuery = {
         statusWaitTimestamp: {
-            $gte: twentyFourHoursAgo.toMillis(),
-            $lte: now.toMillis()
+            $gte: twentyFourHoursAgo.toJSDate(),
+            $lte: now.toJSDate()
         }
     };
 
@@ -143,7 +169,7 @@ export const baseCampaignSendAlerts = async () => {
     }
 
     console.log(
-        `nlSend records that are A) sendState !== "done", B) scheduled in the last 24 hours, and C) send size greater than ${minSendSize}: ${eligibleRecentNewsletterSends
+        `nlSend records that are A) sendState !== "done", B) scheduled in the last 24 hours, and C) send size greater than ${minSendSize}:\n${eligibleRecentNewsletterSends
             .map((s) => s._id)
             .join(", ")}`
     );
@@ -185,7 +211,10 @@ export const baseCampaignSendAlerts = async () => {
     }
 
     if (alarmCampaignLetterIds.length > 0) {
-        await escalateAlert(CartaAlerts.Multiple_Campaign_Send_Delay, "P0");
+        await escalateAlert(
+            CartaAlerts.Multiple_Campaign_Send_Delay,
+            Priority.P1
+        );
     }
 
     await client.close();
