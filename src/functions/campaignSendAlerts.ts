@@ -143,7 +143,7 @@ export const baseCampaignSendAlerts = async () => {
     }
 
     console.log(
-        `nlSend records that are A) sendState !== "done", B) scheduled in the last 24 hours, and C) send size greater than ${100}: ${eligibleRecentNewsletterSends
+        `nlSend records that are A) sendState !== "done", B) scheduled in the last 24 hours, and C) send size greater than ${minSendSize}: ${eligibleRecentNewsletterSends
             .map((s) => s._id)
             .join(", ")}`
     );

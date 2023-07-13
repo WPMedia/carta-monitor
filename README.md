@@ -1,6 +1,6 @@
 # Serverless API: Typescript and Jest Template
 
-## Offline Testing
+## Local Development
 
 ```
 . ./.envrc

@@ -12,8 +12,8 @@ export const enum CartaAlerts {
     // Schedule alerts
     // These alerts check if there have been any 'send' events in the past 15 and 30 minutes for different types of sends.
     // If no activity is detected, an alert is triggered.
-    // How to test: no effect way to test,
-    // instead, if this does not work, the error will show itself via the "Delay" alerts,
+    // How to test: no effective way to test,
+    // instead, if these do not work, the error will show itself via the "Delay" alerts,
     // because if we are not sending letters regularly,
     // those alerts will fire
     Schedule_Transactional_Send = "Schedule_Transactional_Send",
@@ -34,6 +34,8 @@ export const enum CartaAlerts {
     // Metrics alerts
     // These alerts check if the volume of documents in the 'events' collection exceeds a threshold.
     // How to test: reduce METRICS_EVENTS_COUNT_ALERT_THRESHHOLD .env to something very low, then trigger metrics events to process
+    // To figure out how log to reduce METRICS_EVENTS_COUNT_ALERT_THRESHHOLD, take a look at the lambda logs and see how many metrics are currently processing,
+    // then set the threshhold to less than that
     Metrics_Processing_Above_Threshshold = "Metrics_Processing_Above_Threshshold", // Events collection is backed up
 
     // File download alerts
@@ -54,11 +56,11 @@ export const enum CartaAlerts {
     Multiple_Campaign_Send_Delay = "Multiple_Campaign_Send_Delay", // Email send of multiple campaigns is delayed.
 
     // Carta-sender
-    // How to test: pass an invalid email, like "12345", to the CARTA_SENDER_EMAIL variable
+    // How to test: pass an invalid email, like "12345", to the CARTA_SENDER_EMAIL variable, then carta-sender will return a failure response
     Carta_Sender = "Carta_Sender",
 
     // Unknown issue with monitor
-    // How to test: Any unhandled error
+    // How to test: Throw any unhandle exception
     Unknown_Carta_Monitor_Error = "Unknown_Carta_Monitor_Error"
 }
 
