@@ -41,7 +41,12 @@ export const enum CartaAlerts {
     // File download alerts
     // These alerts check for delayed processing of file downloads.
     // How to test: reduce FILE_DOWNLOAD_PROCESSING_THRESHHOLD_MINUTES to a lower threshhold, then trigger a large file download
-    File_Download_Processing_Delay = "File_Download_Processing_Delay", // File download processing is delayed more than 15 mins
+    // To find large files to trigger, go to:
+    // https://sandbox.washpost.arcpublishing.com/carta/lists
+    // And sort by Valid Users
+    // To trigger large file download, for each list, go to "Download as CSV" and Export CVS
+    // Make sure to trigger 2 large file downloads, plus a third one (any size) since we process two files at a time
+    File_Download_Processing_Delay = "File_Download_Processing_Delay", // File download processing is delayed more than X mins
 
     // Dynamic list alerts
     // These alerts check for processing delays in dynamic lists.
