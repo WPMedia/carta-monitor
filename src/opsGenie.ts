@@ -72,7 +72,7 @@ export async function createAlert(
         description:
             !customDescription && !description
                 ? "No description provided"
-                : `${customDescription} ${description}`,
+                : `${customDescription ?? ""}${description}`,
         priority: environmentPriority
     });
     console.log(`Alert ${alias} created successfully: ${JSON.stringify(json)}`);
