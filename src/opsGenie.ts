@@ -124,6 +124,12 @@ export async function escalateAlert(
         environmentPriority = Priority.P3;
     }
 
+    // If we try to escalate an alert that doesn't exist, create it first.
+    const isOpen = await isAlertCurrentlyOpen(alias);
+    if (!isOpen) {
+        await createAlert(alias);
+    }
+
     const json = await makeOpsGenieRequest(
         `${alias}?identifierType=alias`,
         "PATCH",

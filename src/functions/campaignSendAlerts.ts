@@ -44,7 +44,6 @@ export const evaluateNewsletterSend = (
     const attemptedSendCount = sentSuccessfulCount + sentFailedCount;
 
     if (attemptedSendCount > 0) {
-        console.log("TEST ===" + sentFailedCount + "   " + attemptedSendCount);
         const sentPercentage = sentSuccessfulCount / attemptedSendCount;
         console.log(`Sent percentage: ${sentPercentage}`);
         // Calculate the allotted time for a P1 alert. For every segment of attempted sends (defined by the configuration),
